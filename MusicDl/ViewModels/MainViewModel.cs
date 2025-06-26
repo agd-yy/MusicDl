@@ -127,7 +127,6 @@ public partial class MainViewModel : ObservableObject
         {
             // Indicate that we're working
             IsSearching = true;
-            SnackbarMessageQueue.Enqueue(string.Empty);
 
             // Convert AudioQuality enum to lowercase string for API parameter
             string qualityLevel = music.AudioQuality.ToString().ToLower();
@@ -229,7 +228,6 @@ public partial class MainViewModel : ObservableObject
 
             // Indicate that we're working
             IsSearching = true;
-            SnackbarMessageQueue.Enqueue(string.Empty);
 
             // Create a new HttpClient for downloading
             using var downloadClient = new HttpClient();
