@@ -33,6 +33,7 @@
     <Window.Resources>
         <BitmapImage x:Key="DefaultCoverImage" UriSource="/Resources/CoverImage.png" />
     </Window.Resources>
+
     <materialDesign:DialogHost
         x:Name="diag_Main"
         DialogTheme="Inherit"
@@ -282,8 +283,7 @@
                                         Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.ParseCommand}"
                                         CommandParameter="{Binding .}"
                                         Style="{StaticResource MaterialDesignIconButton}"
-                                        ToolTip="Detail"
-                                        Visibility="Collapsed">
+                                        ToolTip="Detail">
                                         <materialDesign:PackIcon
                                             Width="24"
                                             Height="24"

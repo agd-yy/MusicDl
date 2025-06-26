@@ -122,6 +122,12 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        if (!string.IsNullOrEmpty(music.Url))
+        {
+            await ShowMusicDetails(music);
+            return;
+        }
+
         try
         {
             // Indicate that we're working
@@ -183,6 +189,9 @@ public partial class MainViewModel : ObservableObject
         {
             IsSearching = false;
         }
+
+        // Show the dialog with music details
+        await ShowMusicDetails(music);
     }
 
     [RelayCommand]
@@ -277,6 +286,35 @@ public partial class MainViewModel : ObservableObject
         finally
         {
             IsSearching = false;
+        }
+    }
+
+    private async Task ShowMusicDetails(MusicDetail music)
+    {
+        if (music == null)
+        {
+            SnackbarMessageQueue.Enqueue("No music details to display");
+            return;
+        }
+
+        try
+        {
+            // Create the dialog content
+            var dialogContent = new Views.MusicDetailDialog
+            {
+                DataContext = music
+            };
+
+            // Show the dialog using the MaterialDesignInXamlToolkit DialogHost
+            // The "RootDialog" identifier matches the one in MainWindow.xaml
+            await DialogHost.Show(dialogContent, "RootDialog", new DialogClosingEventHandler((s, e) =>
+            {
+                // You can handle any dialog closing logic here if needed
+            }));
+        }
+        catch (Exception ex)
+        {
+            SnackbarMessageQueue.Enqueue($"Error showing details: {ex.Message}");
         }
     }
 
