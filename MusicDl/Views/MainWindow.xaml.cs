@@ -1,4 +1,5 @@
-﻿using MusicDl.ViewModels;
+﻿using MaterialDesignThemes.Wpf;
+using MusicDl.ViewModels;
 using System.Windows;
 
 namespace MusicDl.Views;
@@ -9,6 +10,10 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        DataContext = new MainViewModel();
+        var vm = new MainViewModel();
+        
+        DataContext = vm;
+
+        MainSnackbar.MessageQueue = vm.SnackbarMessageQueue as SnackbarMessageQueue;
     }
 }

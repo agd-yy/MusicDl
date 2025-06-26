@@ -19,282 +19,316 @@
     Style="{StaticResource MaterialDesignWindow}"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
+
+    <!--<WindowChrome.WindowChrome>
+        <WindowChrome
+            CaptionHeight="44"
+            CornerRadius="0"
+            GlassFrameThickness="5"
+            NonClientFrameEdges="None"
+            ResizeBorderThickness="2"
+            UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>-->
+
     <Window.Resources>
         <BitmapImage x:Key="DefaultCoverImage" UriSource="/Resources/CoverImage.png" />
     </Window.Resources>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <materialDesign:DialogHost
+        x:Name="diag_Main"
+        DialogTheme="Inherit"
+        Identifier="RootDialog"
+        SnackbarMessageQueue="{Binding ElementName=MainSnackbar, Path=MessageQueue}">
 
-        <Grid Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <TextBox
-                VerticalAlignment="Center"
-                materialDesign:HintAssist.Hint="Please enter the music name."
-                DockPanel.Dock="Right"
-                Style="{StaticResource MaterialDesignFilledTextBox}"
-                Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
-                <TextBox.InputBindings>
-                    <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
-                </TextBox.InputBindings>
-            </TextBox>
-            <Button
-                Grid.Column="1"
-                Command="{Binding SearchCommand}"
-                Content="Search"
-                FontWeight="Bold"
-                IsEnabled="{Binding IsSearching, Converter={cnvts:InverseBooleanConverter}}"
-                Style="{StaticResource MaterialDesignFlatLightBgButton}" />
-        </Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <ComboBox
-                Width="80"
-                Margin="5,0"
-                VerticalAlignment="Center"
-                materialDesign:HintAssist.Hint="Limit"
-                ItemsSource="{Binding LimitOptions}"
-                SelectedItem="{Binding SelectedLimit}"
-                Style="{StaticResource MaterialDesignOutlinedComboBox}" />
-            <ComboBox
-                Width="100"
-                Margin="5,0"
-                materialDesign:HintAssist.Hint="Quality"
-                DisplayMemberPath="Description"
-                ItemsSource="{Binding Source={ext:Enumeration {x:Type model:AudioQuality}}}"
-                SelectedValue="{Binding SelectedAudioQuality}"
-                SelectedValuePath="Value"
-                Style="{StaticResource MaterialDesignOutlinedComboBox}" />
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox
+                    VerticalAlignment="Center"
+                    materialDesign:HintAssist.Hint="Please enter the music name."
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource MaterialDesignFilledTextBox}"
+                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+                <Button
+                    Grid.Column="1"
+                    Command="{Binding SearchCommand}"
+                    Content="Search"
+                    FontWeight="Bold"
+                    IsEnabled="{Binding IsSearching, Converter={cnvts:InverseBooleanConverter}}"
+                    Style="{StaticResource MaterialDesignFlatLightBgButton}" />
+            </Grid>
 
-            <!--  Error Message Display  -->
-            <TextBlock
-                Margin="10,0"
-                VerticalAlignment="Center"
-                Foreground="Red"
-                Text="{Binding ErrorMessage}"
-                Visibility="{Binding ErrorMessage, Converter={cnvts:StringToVisibilityConverter}}" />
+            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                <ComboBox
+                    Width="80"
+                    Margin="5,0"
+                    VerticalAlignment="Center"
+                    materialDesign:HintAssist.Hint="Limit"
+                    ItemsSource="{Binding LimitOptions}"
+                    SelectedItem="{Binding SelectedLimit}"
+                    Style="{StaticResource MaterialDesignOutlinedComboBox}" />
+                <ComboBox
+                    Width="100"
+                    Margin="5,0"
+                    materialDesign:HintAssist.Hint="Quality"
+                    DisplayMemberPath="Description"
+                    ItemsSource="{Binding Source={ext:Enumeration {x:Type model:AudioQuality}}}"
+                    SelectedValue="{Binding SelectedAudioQuality}"
+                    SelectedValuePath="Value"
+                    Style="{StaticResource MaterialDesignOutlinedComboBox}" />
+
+                <TextBox
+                    Margin="0,0,5,0"
+                    VerticalAlignment="Center"
+                    materialDesign:HintAssist.Hint="Save location"
+                    materialDesign:TextFieldAssist.TrailingIcon="FolderOpen"
+                    IsReadOnly="True"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    Text="{Binding SaveDirectoryPath, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="{Binding SaveDirectoryPath}">
+                    <TextBox.InputBindings>
+                        <MouseBinding Command="{Binding SelectSaveDirectoryCommand}" MouseAction="LeftClick" />
+                    </TextBox.InputBindings>
+                </TextBox>
+            </StackPanel>
+
+            <!--  优化ListBox以占满整行空间  -->
+            <ListBox
+                Grid.Row="2"
+                Margin="8,0"
+                HorizontalContentAlignment="Stretch"
+                Background="Transparent"
+                BorderThickness="0"
+                ItemsSource="{Binding MusicDetails}"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                Style="{StaticResource MaterialDesignCardsListBox}">
+                <ListBox.ItemContainerStyle>
+                    <Style BasedOn="{StaticResource MaterialDesignCardsListBoxItem}" TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0,2" />
+                        <Setter Property="Margin" Value="0,3" />
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <materialDesign:Card
+                            Padding="12"
+                            Background="{DynamicResource MaterialDesignBackground}"
+                            UniformCornerRadius="8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!--  Cover Image  -->
+                                <Border
+                                    Width="60"
+                                    Height="60"
+                                    Margin="0,0,8,0"
+                                    ClipToBounds="True"
+                                    CornerRadius="4">
+                                    <Image Stretch="UniformToFill">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Source" Value="{Binding CoverUrl}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding CoverUrl}" Value="{x:Null}">
+                                                        <Setter Property="Source" Value="{StaticResource DefaultCoverImage}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding CoverUrl}" Value="">
+                                                        <Setter Property="Source" Value="{StaticResource DefaultCoverImage}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </Border>
+
+                                <!--  Music Details  -->
+                                <StackPanel
+                                    Grid.Column="1"
+                                    Margin="4,0"
+                                    VerticalAlignment="Center">
+                                    <!--  Music Name  -->
+                                    <TextBlock
+                                        FontWeight="Medium"
+                                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                        Text="{Binding Name}"
+                                        TextTrimming="CharacterEllipsis" />
+
+                                    <!--  Artists  -->
+                                    <Grid Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <materialDesign:PackIcon
+                                            VerticalAlignment="Center"
+                                            Kind="Artist"
+                                            Opacity="0.6" />
+
+                                        <ItemsControl
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            ItemsSource="{Binding Artist}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock
+                                                        Margin="0,0,5,0"
+                                                        Opacity="0.8"
+                                                        Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                                        Text="{Binding Name}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Grid>
+
+                                    <!--  Album & Duration  -->
+                                    <Grid Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <materialDesign:PackIcon
+                                            Grid.Column="0"
+                                            VerticalAlignment="Center"
+                                            Kind="Album"
+                                            Opacity="0.6" />
+
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            Opacity="0.7"
+                                            Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                            Text="{Binding Album.Name}"
+                                            TextTrimming="CharacterEllipsis" />
+
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                            <materialDesign:PackIcon
+                                                VerticalAlignment="Center"
+                                                Kind="Clock"
+                                                Opacity="0.6" />
+                                            <TextBlock
+                                                Margin="4,0,0,0"
+                                                Opacity="0.7"
+                                                Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                Text="{Binding Duration}" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!--  Quality & Size  -->
+                                    <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                                        <Border
+                                            Padding="6,2"
+                                            Background="{DynamicResource PrimaryHueLightBrush}"
+                                            CornerRadius="4">
+                                            <TextBlock
+                                                Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
+                                                Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                Text="{Binding AudioQuality, Converter={cnvts:AudioQualityConverter}}" />
+                                        </Border>
+
+                                        <TextBlock
+                                            Margin="12,0,0,0"
+                                            Opacity="0.7"
+                                            Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                            Text="{Binding Size, Converter={cnvts:FileSizeConverter}}" />
+
+                                        <Border
+                                            Margin="8,0,0,0"
+                                            Padding="4,1"
+                                            BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                            BorderThickness="1"
+                                            CornerRadius="2"
+                                            Visibility="{Binding IsMember, Converter={cnvts:BooleanToVisibilityConverter}}">
+                                            <TextBlock
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                                Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                Text="VIP" />
+                                        </Border>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!--  Action Buttons  -->
+                                <StackPanel
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                                    <Button
+                                        Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.ParseCommand}"
+                                        CommandParameter="{Binding .}"
+                                        Style="{StaticResource MaterialDesignIconButton}"
+                                        ToolTip="Detail"
+                                        Visibility="Collapsed">
+                                        <materialDesign:PackIcon
+                                            Width="24"
+                                            Height="24"
+                                            Kind="PlaylistMusic" />
+                                    </Button>
+                                    <Button
+                                        Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.DownloadCommand}"
+                                        CommandParameter="{Binding .}"
+                                        Style="{StaticResource MaterialDesignIconButton}"
+                                        ToolTip="Download">
+                                        <materialDesign:PackIcon
+                                            Width="24"
+                                            Height="24"
+                                            Kind="Download" />
+                                    </Button>
+                                    <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Add to Playlist">
+                                        <materialDesign:PackIcon
+                                            Width="24"
+                                            Height="24"
+                                            Kind="PlaylistAdd" />
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </materialDesign:Card>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
             <!--  Loading Indicator  -->
             <ProgressBar
+                Grid.RowSpan="3"
                 Width="100"
                 IsIndeterminate="True"
                 Style="{StaticResource MaterialDesignCircularProgressBar}"
                 Visibility="{Binding IsSearching, Converter={cnvts:BooleanToVisibilityConverter}}"
                 Value="0" />
-        </StackPanel>
 
-        <!--  优化ListBox以占满整行空间  -->
-        <ListBox
-            Grid.Row="2"
-            Margin="8,0"
-            HorizontalContentAlignment="Stretch"
-            Background="Transparent"
-            BorderThickness="0"
-            ItemsSource="{Binding MusicDetails}"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            Style="{StaticResource MaterialDesignCardsListBox}">
-            <ListBox.ItemContainerStyle>
-                <Style BasedOn="{StaticResource MaterialDesignCardsListBoxItem}" TargetType="ListBoxItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="Padding" Value="0,2" />
-                    <Setter Property="Margin" Value="0,3" />
-                    <Setter Property="Background" Value="Transparent" />
-                </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <materialDesign:Card
-                        Padding="12"
-                        Background="{DynamicResource MaterialDesignBackground}"
-                        UniformCornerRadius="8">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <!--  Cover Image  -->
-                            <Border
-                                Width="60"
-                                Height="60"
-                                Margin="0,0,8,0"
-                                ClipToBounds="True"
-                                CornerRadius="4">
-                                <Image Stretch="UniformToFill">
-                                    <Image.Style>
-                                        <Style TargetType="Image">
-                                            <Setter Property="Source" Value="{Binding CoverUrl}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding CoverUrl}" Value="{x:Null}">
-                                                    <Setter Property="Source" Value="{StaticResource DefaultCoverImage}" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding CoverUrl}" Value="">
-                                                    <Setter Property="Source" Value="{StaticResource DefaultCoverImage}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Image.Style>
-                                </Image>
-                            </Border>
-
-                            <!--  Music Details  -->
-                            <StackPanel
-                                Grid.Column="1"
-                                Margin="4,0"
-                                VerticalAlignment="Center">
-                                <!--  Music Name  -->
-                                <TextBlock
-                                    FontWeight="Medium"
-                                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                                    Text="{Binding Name}"
-                                    TextTrimming="CharacterEllipsis" />
-
-                                <!--  Artists  -->
-                                <Grid Margin="0,4,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <materialDesign:PackIcon
-                                        VerticalAlignment="Center"
-                                        Kind="Artist"
-                                        Opacity="0.6" />
-
-                                    <ItemsControl
-                                        Grid.Column="1"
-                                        Margin="4,0,0,0"
-                                        ItemsSource="{Binding Artist}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel Orientation="Horizontal" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock
-                                                    Margin="0,0,5,0"
-                                                    Opacity="0.8"
-                                                    Style="{StaticResource MaterialDesignBody2TextBlock}"
-                                                    Text="{Binding Name}" />
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </Grid>
-
-                                <!--  Album & Duration  -->
-                                <Grid Margin="0,4,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <materialDesign:PackIcon
-                                        Grid.Column="0"
-                                        VerticalAlignment="Center"
-                                        Kind="Album"
-                                        Opacity="0.6" />
-
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        Margin="4,0,0,0"
-                                        Opacity="0.7"
-                                        Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                        Text="{Binding Album.Name}"
-                                        TextTrimming="CharacterEllipsis" />
-
-                                    <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                        <materialDesign:PackIcon
-                                            VerticalAlignment="Center"
-                                            Kind="Clock"
-                                            Opacity="0.6" />
-                                        <TextBlock
-                                            Margin="4,0,0,0"
-                                            Opacity="0.7"
-                                            Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                            Text="{Binding Duration}" />
-                                    </StackPanel>
-                                </Grid>
-
-                                <!--  Quality & Size  -->
-                                <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
-                                    <Border
-                                        Padding="6,2"
-                                        Background="{DynamicResource PrimaryHueLightBrush}"
-                                        CornerRadius="4">
-                                        <TextBlock
-                                            Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
-                                            Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                            Text="{Binding AudioQuality, Converter={cnvts:AudioQualityConverter}}" />
-                                    </Border>
-
-                                    <TextBlock
-                                        Margin="12,0,0,0"
-                                        Opacity="0.7"
-                                        Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                        Text="{Binding Size, Converter={cnvts:FileSizeConverter}}" />
-
-                                    <Border
-                                        Margin="8,0,0,0"
-                                        Padding="4,1"
-                                        BorderBrush="{DynamicResource MaterialDesignDivider}"
-                                        BorderThickness="1"
-                                        CornerRadius="2"
-                                        Visibility="{Binding IsMember, Converter={cnvts:BooleanToVisibilityConverter}}">
-                                        <TextBlock
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource SecondaryHueMidBrush}"
-                                            Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                            Text="VIP" />
-                                    </Border>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <!--  Action Buttons  -->
-                            <StackPanel
-                                Grid.Column="2"
-                                VerticalAlignment="Center"
-                                Orientation="Horizontal">
-                                <Button
-                                    Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.ParseCommand}"
-                                    CommandParameter="{Binding .}"
-                                    Style="{StaticResource MaterialDesignIconButton}"
-                                    ToolTip="Detail"
-                                    Visibility="Collapsed">
-                                    <materialDesign:PackIcon
-                                        Width="24"
-                                        Height="24"
-                                        Kind="PlaylistMusic" />
-                                </Button>
-                                <Button
-                                    Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.DownloadCommand}"
-                                    CommandParameter="{Binding .}"
-                                    Style="{StaticResource MaterialDesignIconButton}"
-                                    ToolTip="Download">
-                                    <materialDesign:PackIcon
-                                        Width="24"
-                                        Height="24"
-                                        Kind="Download" />
-                                </Button>
-                                <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Add to Playlist">
-                                    <materialDesign:PackIcon
-                                        Width="24"
-                                        Height="24"
-                                        Kind="PlaylistAdd" />
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-                    </materialDesign:Card>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-    </Grid>
+            <materialDesign:Snackbar
+                x:Name="MainSnackbar"
+                Grid.RowSpan="3"
+                Padding="10"
+                VerticalAlignment="Center"
+                Background="#AA000000"
+                IsEnabled="False"
+                MessageQueue="{materialDesign:MessageQueue}" />
+        </Grid>
+    </materialDesign:DialogHost>
 </Window>

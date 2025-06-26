@@ -1,7 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Win32;
 using MusicDl.Models;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -13,14 +16,13 @@ public partial class MainViewModel : ObservableObject
 {
     private readonly HttpClient _httpClient;
 
+    public readonly ISnackbarMessageQueue SnackbarMessageQueue = new SnackbarMessageQueue(TimeSpan.FromSeconds(2));
+
     [ObservableProperty]
     private string _searchText = string.Empty;
 
     [ObservableProperty]
     private bool _isSearching = false;
-
-    [ObservableProperty]
-    private string _errorMessage = string.Empty;
 
     [ObservableProperty]
     private int _selectedLimit = 10;
@@ -32,21 +34,47 @@ public partial class MainViewModel : ObservableObject
     private AudioQuality _selectedAudioQuality = AudioQuality.Lossless;
 
     [ObservableProperty]
+    private string _saveDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+
+    [ObservableProperty]
     private ObservableCollection<MusicDetail> _musicDetails = [];
+
+    [RelayCommand]
+    private void SelectSaveDirectory()
+    {
+        try
+        {
+            var dialog = new OpenFolderDialog
+            {
+                Title = "Select folder to save music files",
+                InitialDirectory = SaveDirectoryPath,
+                Multiselect = false
+            };
+
+            bool? result = dialog.ShowDialog();
+            if (result == true)
+            {
+                SaveDirectoryPath = dialog.FolderName;
+            }
+        }
+        catch (Exception ex)
+        {
+            SnackbarMessageQueue.Enqueue($"Could not open folder dialog: {ex.Message}");
+        }
+    }
 
     [RelayCommand]
     private async Task SearchAsync()
     {
         if (string.IsNullOrWhiteSpace(SearchText))
         {
-            ErrorMessage = "Please enter a search term";
+            SnackbarMessageQueue.Enqueue("Please enter a search term");
             return;
         }
 
         try
         {
             IsSearching = true;
-            ErrorMessage = string.Empty;
             MusicDetails.Clear();
 
             // Build the API URL with the search text and selected limit
@@ -58,7 +86,7 @@ public partial class MainViewModel : ObservableObject
 
             if (response == null || response.Data == null)
             {
-                ErrorMessage = "No results found";
+                SnackbarMessageQueue.Enqueue("No results found");
                 return;
             }
 
@@ -70,15 +98,15 @@ public partial class MainViewModel : ObservableObject
         }
         catch (HttpRequestException ex)
         {
-            ErrorMessage = $"Network error: {ex.Message}";
+            SnackbarMessageQueue.Enqueue($"Network error: {ex.Message}");
         }
         catch (JsonException ex)
         {
-            ErrorMessage = $"Invalid response format: {ex.Message}";
+            SnackbarMessageQueue.Enqueue($"Invalid response format: {ex.Message}");
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"An error occurred: {ex.Message}";
+            SnackbarMessageQueue.Enqueue($"An error occurred: {ex.Message}");
         }
         finally
         {
@@ -91,7 +119,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (music == null || string.IsNullOrEmpty(music.Id))
         {
-            ErrorMessage = "Invalid music selection";
+            SnackbarMessageQueue.Enqueue("Invalid music selection");
             return;
         }
 
@@ -99,7 +127,7 @@ public partial class MainViewModel : ObservableObject
         {
             // Indicate that we're working
             IsSearching = true;
-            ErrorMessage = string.Empty;
+            SnackbarMessageQueue.Enqueue(string.Empty);
 
             // Convert AudioQuality enum to lowercase string for API parameter
             string qualityLevel = music.AudioQuality.ToString().ToLower();
@@ -112,7 +140,7 @@ public partial class MainViewModel : ObservableObject
 
             if (response == null || response.Status != 200)
             {
-                ErrorMessage = "Failed to retrieve music details";
+                SnackbarMessageQueue.Enqueue("Failed to retrieve music details");
                 return;
             }
 
@@ -142,15 +170,15 @@ public partial class MainViewModel : ObservableObject
         }
         catch (HttpRequestException ex)
         {
-            ErrorMessage = $"Network error: {ex.Message}";
+            SnackbarMessageQueue.Enqueue($"Network error: {ex.Message}");
         }
         catch (JsonException ex)
         {
-            ErrorMessage = $"Invalid response format: {ex.Message}";
+            SnackbarMessageQueue.Enqueue($"Invalid response format: {ex.Message}");
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"An error occurred: {ex.Message}";
+            SnackbarMessageQueue.Enqueue($"An error occurred: {ex.Message}");
         }
         finally
         {
@@ -163,9 +191,28 @@ public partial class MainViewModel : ObservableObject
     {
         if (music == null)
         {
-            ErrorMessage = "Invalid music selection";
+            SnackbarMessageQueue.Enqueue("Invalid music selection");
             return;
         }
+
+        // 检查FileDirectory是否非法
+        if (string.IsNullOrWhiteSpace(SaveDirectoryPath))
+        {
+            SaveDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+        }
+        else if (!Directory.Exists(SaveDirectoryPath))
+        {
+            try
+            {
+                Directory.CreateDirectory(SaveDirectoryPath);
+            }
+            catch (Exception ex)
+            {
+                SnackbarMessageQueue.Enqueue($"Failed to create directory: {ex.Message}");
+                return;
+            }
+        }
+
         try
         {
             // Check if the music URL is available
@@ -174,10 +221,16 @@ public partial class MainViewModel : ObservableObject
                 await ParseAsync(music);
             }
 
+            if (string.IsNullOrEmpty(music.Url))
+            {
+                SnackbarMessageQueue.Enqueue("Music URL is not available, please try again.");
+                return;
+            }
+
             // Indicate that we're working
             IsSearching = true;
-            ErrorMessage = string.Empty;
-            
+            SnackbarMessageQueue.Enqueue(string.Empty);
+
             // Create a new HttpClient for downloading
             using var downloadClient = new HttpClient();
 
@@ -201,20 +254,19 @@ public partial class MainViewModel : ObservableObject
             // Get the file name from the URL and use the correct extension
             string fileName = $"{string.Join("_", music.Artist.Select(x => x.Name))}-{music.Name}{fileExtension}";
 
-            // Save the file to disk (you may want to use a save dialog in a real app)
-            var filePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), fileName);
-            await System.IO.File.WriteAllBytesAsync(filePath, await response.Content.ReadAsByteArrayAsync());
+            var filePath = Path.Combine(SaveDirectoryPath, fileName);
+            await File.WriteAllBytesAsync(filePath, await response.Content.ReadAsByteArrayAsync());
 
             // Notify user of success (you might want to use a dialog or notification in a real app)
-            ErrorMessage = $"Downloaded: {fileName} to {filePath}";
+            SnackbarMessageQueue.Enqueue($"Downloaded: {fileName} to {filePath}");
         }
         catch (HttpRequestException ex)
         {
-            ErrorMessage = $"Download failed: {ex.Message}";
+            SnackbarMessageQueue.Enqueue($"Download failed: {ex.Message}");
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"An error occurred: {ex.Message}";
+            SnackbarMessageQueue.Enqueue($"An error occurred: {ex.Message}");
         }
         finally
         {
