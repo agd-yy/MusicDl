@@ -10,11 +10,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:model="clr-namespace:MusicDl.Models"
     xmlns:vm="clr-namespace:MusicDl.ViewModels"
-    Title="MainWindow"
+    Title="MusicDl"
     Width="600"
-    Height="450"
+    Height="500"
     d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
     FontFamily="Microsoft Yahei"
+    Icon="/Resources/CoverImage.png"
     Style="{StaticResource MaterialDesignWindow}"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
@@ -202,26 +203,13 @@
                                         Kind="Album"
                                         Opacity="0.6" />
 
-                                    <ItemsControl
+                                    <TextBlock
                                         Grid.Column="1"
                                         Margin="4,0,0,0"
-                                        ItemsSource="{Binding Album}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel Orientation="Horizontal" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock
-                                                    Margin="0,0,5,0"
-                                                    Opacity="0.7"
-                                                    Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                                    Text="{Binding Name}"
-                                                    TextTrimming="CharacterEllipsis" />
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                        Opacity="0.7"
+                                        Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                        Text="{Binding Album.Name}"
+                                        TextTrimming="CharacterEllipsis" />
 
                                     <StackPanel Grid.Column="2" Orientation="Horizontal">
                                         <materialDesign:PackIcon
@@ -275,7 +263,22 @@
                                 Grid.Column="2"
                                 VerticalAlignment="Center"
                                 Orientation="Horizontal">
-                                <Button Style="{StaticResource MaterialDesignIconButton}" ToolTip="Download">
+                                <Button
+                                    Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.ParseCommand}"
+                                    CommandParameter="{Binding .}"
+                                    Style="{StaticResource MaterialDesignIconButton}"
+                                    ToolTip="Detail"
+                                    Visibility="Collapsed">
+                                    <materialDesign:PackIcon
+                                        Width="24"
+                                        Height="24"
+                                        Kind="PlaylistMusic" />
+                                </Button>
+                                <Button
+                                    Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.DownloadCommand}"
+                                    CommandParameter="{Binding .}"
+                                    Style="{StaticResource MaterialDesignIconButton}"
+                                    ToolTip="Download">
                                     <materialDesign:PackIcon
                                         Width="24"
                                         Height="24"

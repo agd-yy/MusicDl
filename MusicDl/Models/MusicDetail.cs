@@ -16,7 +16,7 @@ public partial class MusicDetail : ObservableObject
     [ObservableProperty]
     private ObservableCollection<Artist> _artist = [];
     [ObservableProperty]
-    private ObservableCollection<Album> _album = [];
+    private Album _album = new();
     [ObservableProperty]
     private string _url = string.Empty;
     [ObservableProperty]
@@ -25,5 +25,7 @@ public partial class MusicDetail : ObservableObject
     private int _size = 0;
     [ObservableProperty]
     private string _duration = string.Empty;
+    [ObservableProperty]
+    private string _lyric = string.Empty;
 }
 

@@ -4,19 +4,31 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+	<BaseOutputPath>..\bin\</BaseOutputPath>
+	<ApplicationIcon>Resources\favicon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <!--// Release 模式下禁用 Debug 信息 //-->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	<Optimize>true</Optimize>
+	<DebugType>none</DebugType>
+	<DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
 	<None Remove="Resources\CoverImage.png" />
+	<None Remove="Resources\favicon.ico" />
   </ItemGroup>
 
   <ItemGroup>
 	  <PackageReference Include="CommunityToolkit.Mvvm" />
 	  <PackageReference Include="MaterialDesignThemes" />
+	  <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Resources\CoverImage.png" />
+    <Resource Include="Resources\favicon.ico" />
   </ItemGroup>
 
 </Project>
