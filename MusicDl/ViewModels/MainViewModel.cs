@@ -14,8 +14,6 @@ namespace MusicDl.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    private readonly HttpClient _httpClient;
-
     public readonly ISnackbarMessageQueue SnackbarMessageQueue = new SnackbarMessageQueue(TimeSpan.FromSeconds(2));
 
     [ObservableProperty]
@@ -81,6 +79,7 @@ public partial class MainViewModel : ObservableObject
             string encodedSearchText = HttpUtility.UrlEncode(SearchText);
             string apiUrl = $"https://api.kxzjoker.cn/api/163_search?name={encodedSearchText}&limit={SelectedLimit}";
 
+            using var _httpClient = new HttpClient();
             // Make the API request
             var response = await _httpClient.GetFromJsonAsync<KxzSearchResp>(apiUrl);
 
@@ -134,6 +133,7 @@ public partial class MainViewModel : ObservableObject
             // Build the API URL with the music ID and quality level
             string apiUrl = $"https://api.kxzjoker.cn/api/163_music?ids={music.Id}&level={qualityLevel}&type=json";
 
+            using var _httpClient = new HttpClient();
             // Make the API request
             var response = await _httpClient.GetFromJsonAsync<KxzMusicResp>(apiUrl);
 
@@ -253,10 +253,18 @@ public partial class MainViewModel : ObservableObject
             string fileName = $"{string.Join("_", music.Artist.Select(x => x.Name))}-{music.Name}{fileExtension}";
 
             var filePath = Path.Combine(SaveDirectoryPath, fileName);
-            await File.WriteAllBytesAsync(filePath, await response.Content.ReadAsByteArrayAsync());
 
-            // Notify user of success (you might want to use a dialog or notification in a real app)
-            SnackbarMessageQueue.Enqueue($"Downloaded: {fileName} to {filePath}");
+            // 判断文件是否存在
+            if (!File.Exists(filePath))
+            {
+                await File.WriteAllBytesAsync(filePath, await response.Content.ReadAsByteArrayAsync());
+
+                // Notify user of success (you might want to use a dialog or notification in a real app)
+                SnackbarMessageQueue.Enqueue($"Download success");
+            }
+
+            // 写入标签
+            await WriteMusicTag(filePath, music);
         }
         catch (HttpRequestException ex)
         {
@@ -270,6 +278,84 @@ public partial class MainViewModel : ObservableObject
         {
             IsSearching = false;
         }
+    }
+
+    private async Task WriteMusicTag(string filePath, MusicDetail music)
+    {
+        // 使用 TagLibSharp 库来写入音乐标签
+        try
+        {
+            var file = TagLib.File.Create(filePath);
+            // 设置音乐标签
+            file.Tag.Title = music.Name;
+            file.Tag.Performers = [.. music.Artist.Select(a => a.Name)];
+            file.Tag.Album = music.Album.Name;
+            file.Tag.Lyrics = music.Lyric;
+
+            // Year
+            if (DateTime.TryParse(music.Album.PublishTime, out DateTime date) && date.Year != 1970)
+            {
+                file.Tag.Year = (uint)date.Year;
+            }
+
+            // 设置封面图片
+            if (!string.IsNullOrEmpty(music.CoverUrl))
+            {
+                // Download the cover image
+                using var httpClient = new HttpClient();
+                byte[] imageData = await httpClient.GetByteArrayAsync(music.CoverUrl);
+
+                // Convert the downloaded image to a TagLib.Picture
+                var picture = new TagLib.Picture
+                {
+                    Type = TagLib.PictureType.FrontCover,
+                    MimeType = GetMimeTypeFromUrl(music.CoverUrl),
+                    Description = "Cover",
+                    Data = [.. imageData]
+                };
+
+                // Add the picture to the file's tag
+                file.Tag.Pictures = [picture];
+            }
+            // 保存更改
+            file.Save();
+
+            SnackbarMessageQueue.Enqueue("Tags written successfully");
+        }
+        catch (Exception ex)
+        {
+            SnackbarMessageQueue.Enqueue($"Failed to write tags: {ex.Message}");
+        }
+    }
+
+    private string GetMimeTypeFromUrl(string url)
+    {
+        // Default to JPEG if we can't determine
+        if (string.IsNullOrEmpty(url))
+            return "image/jpeg";
+
+        // Extract the file extension from the URL
+        string lowerUrl = url.ToLower();
+
+        if (lowerUrl.EndsWith(".jpg") || lowerUrl.EndsWith(".jpeg"))
+            return "image/jpeg";
+        if (lowerUrl.EndsWith(".png"))
+            return "image/png";
+        if (lowerUrl.EndsWith(".gif"))
+            return "image/gif";
+        if (lowerUrl.EndsWith(".bmp"))
+            return "image/bmp";
+        if (lowerUrl.EndsWith(".webp"))
+            return "image/webp";
+
+        // If the URL doesn't have a file extension, try to look for format indicators
+        if (lowerUrl.Contains("format=png"))
+            return "image/png";
+        if (lowerUrl.Contains("format=jpg") || lowerUrl.Contains("format=jpeg"))
+            return "image/jpeg";
+
+        // Default to JPEG as it's most common for album covers
+        return "image/jpeg";
     }
 
     private MusicDetail ConvertToMusicDetail(SongData songData)
@@ -301,13 +387,5 @@ public partial class MainViewModel : ObservableObject
         }
 
         return musicDetail;
-    }
-
-    public MainViewModel()
-    {
-        _httpClient = new HttpClient
-        {
-            Timeout = TimeSpan.FromSeconds(20) // Set a reasonable timeout for HTTP requests
-        };
     }
 }

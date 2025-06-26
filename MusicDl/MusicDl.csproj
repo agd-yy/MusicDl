@@ -24,6 +24,7 @@
 	  <PackageReference Include="CommunityToolkit.Mvvm" />
 	  <PackageReference Include="MaterialDesignThemes" />
 	  <PackageReference Include="Newtonsoft.Json" />
+	  <PackageReference Include="TagLibSharp" />
   </ItemGroup>
 
   <ItemGroup>
