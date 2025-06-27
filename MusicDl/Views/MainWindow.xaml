@@ -12,7 +12,7 @@
     xmlns:vm="clr-namespace:MusicDl.ViewModels"
     Title="MusicDl"
     Width="600"
-    Height="500"
+    Height="800"
     d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
     FontFamily="Microsoft Yahei"
     Icon="/Resources/CoverImage.png"
@@ -20,7 +20,7 @@
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 
-    <!--<WindowChrome.WindowChrome>
+    <WindowChrome.WindowChrome>
         <WindowChrome
             CaptionHeight="44"
             CornerRadius="0"
@@ -28,7 +28,7 @@
             NonClientFrameEdges="None"
             ResizeBorderThickness="2"
             UseAeroCaptionButtons="False" />
-    </WindowChrome.WindowChrome>-->
+    </WindowChrome.WindowChrome>
 
     <Window.Resources>
         <BitmapImage x:Key="DefaultCoverImage" UriSource="/Resources/CoverImage.png" />

@@ -14,7 +14,7 @@ namespace MusicDl.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    public readonly ISnackbarMessageQueue SnackbarMessageQueue = new SnackbarMessageQueue(TimeSpan.FromSeconds(2));
+    public readonly ISnackbarMessageQueue SnackbarMessageQueue = new SnackbarMessageQueue(new TimeSpan(0, 0, 0, 400));
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -36,6 +36,8 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private ObservableCollection<MusicDetail> _musicDetails = [];
+
+    private bool _isDownload = false;
 
     [RelayCommand]
     private void SelectSaveDirectory()
@@ -124,7 +126,8 @@ public partial class MainViewModel : ObservableObject
 
         if (!string.IsNullOrEmpty(music.Url))
         {
-            await ShowMusicDetails(music);
+            if (!_isDownload)
+                await ShowMusicDetails(music);
             return;
         }
 
@@ -190,8 +193,8 @@ public partial class MainViewModel : ObservableObject
             IsSearching = false;
         }
 
-        // Show the dialog with music details
-        await ShowMusicDetails(music);
+        if (!_isDownload)
+            await ShowMusicDetails(music);
     }
 
     [RelayCommand]
@@ -223,6 +226,8 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
+            _isDownload = true;
+
             // Check if the music URL is available
             if (string.IsNullOrEmpty(music.Url))
             {
@@ -285,6 +290,7 @@ public partial class MainViewModel : ObservableObject
         }
         finally
         {
+            _isDownload = false;
             IsSearching = false;
         }
     }
