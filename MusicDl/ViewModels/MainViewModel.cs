@@ -359,7 +359,18 @@ public partial class MainViewModel : ObservableObject
             // Get the file name from the URL and use the correct extension
             string fileName = $"{string.Join("_", music.Artist.Select(x => x.Name))}-{music.Name}{fileExtension}";
 
+            // 使用 SaveDirectoryPath/歌手/专辑/fileName，如果歌手名或者专辑名为空则使用默认目录
+            string artistName = string.Join("; ", music.Artist.Select(x => x.Name));
+            string albumName = music.Album?.Name ?? "";
             var filePath = Path.Combine(SaveDirectoryPath, fileName);
+            if (!string.IsNullOrWhiteSpace(artistName) && !string.IsNullOrWhiteSpace(albumName))
+            {
+                var newDir = Path.Combine(SaveDirectoryPath, artistName, albumName);
+                if (!Directory.Exists(newDir))
+                    Directory.CreateDirectory(newDir);
+                
+                filePath = Path.Combine(SaveDirectoryPath, artistName, albumName, fileName);
+            }
 
             // 判断文件是否存在
             if (!File.Exists(filePath))
@@ -373,7 +384,7 @@ public partial class MainViewModel : ObservableObject
             // 如果所有操作都成功完成，标记为下载成功
             downloadSuccess = true;
 
-            ShowMessage($"'{music.Name}' 下载完成", "下载成功", ControlAppearance.Success);
+            ShowMessage($"'{filePath}' 下载完成", "下载成功", ControlAppearance.Success);
         }
         catch (HttpRequestException ex)
         {
