@@ -351,11 +351,12 @@
         <!--#endregion-->
 
         <!--#region Music Detail Panel-->
+        <!--  Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"  -->
         <Border
             Grid.Row="1"
             Grid.RowSpan="3"
             Margin="15"
-            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+            Background="White"
             BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
             BorderThickness="1"
             CornerRadius="12"
@@ -630,11 +631,12 @@
         <!--#endregion-->
 
         <!--#region Playlist Panel-->
+        <!--  Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"  -->
         <Border
             Grid.Row="1"
             Grid.RowSpan="3"
             Margin="10"
-            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+            Background="White"
             BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
             BorderThickness="1"
             CornerRadius="8"
