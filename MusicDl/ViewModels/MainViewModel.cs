@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using MusicDl.Models;
 using System.Collections.ObjectModel;
@@ -9,12 +8,24 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Web;
+using Wpf.Ui;
+using Wpf.Ui.Controls;
 
 namespace MusicDl.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    public readonly ISnackbarMessageQueue SnackbarMessageQueue = new SnackbarMessageQueue(new TimeSpan(0, 0, 0, 400));
+    private ISnackbarService _snackbarService = new SnackbarService();
+
+    public void SetSnackbarService(SnackbarPresenter snackbarPresenter)
+    {
+        _snackbarService.SetSnackbarPresenter(snackbarPresenter);
+    }
+
+    private void ShowMessage(string message)
+    {
+        _snackbarService?.Show("Info", message, ControlAppearance.Secondary, null, TimeSpan.FromSeconds(3));
+    }
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -59,7 +70,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            SnackbarMessageQueue.Enqueue($"Could not open folder dialog: {ex.Message}");
+            ShowMessage($"Could not open folder dialog: {ex.Message}");
         }
     }
 
@@ -68,7 +79,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(SearchText))
         {
-            SnackbarMessageQueue.Enqueue("Please enter a search term");
+            ShowMessage("Please enter a search term");
             return;
         }
 
@@ -87,7 +98,7 @@ public partial class MainViewModel : ObservableObject
 
             if (response == null || response.Data == null)
             {
-                SnackbarMessageQueue.Enqueue("No results found");
+                ShowMessage("No results found");
                 return;
             }
 
@@ -99,15 +110,15 @@ public partial class MainViewModel : ObservableObject
         }
         catch (HttpRequestException ex)
         {
-            SnackbarMessageQueue.Enqueue($"Network error: {ex.Message}");
+            ShowMessage($"Network error: {ex.Message}");
         }
         catch (JsonException ex)
         {
-            SnackbarMessageQueue.Enqueue($"Invalid response format: {ex.Message}");
+            ShowMessage($"Invalid response format: {ex.Message}");
         }
         catch (Exception ex)
         {
-            SnackbarMessageQueue.Enqueue($"An error occurred: {ex.Message}");
+            ShowMessage($"An error occurred: {ex.Message}");
         }
         finally
         {
@@ -115,19 +126,21 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+
+
     [RelayCommand]
     private async Task ParseAsync(MusicDetail music)
     {
         if (music == null || string.IsNullOrEmpty(music.Id))
         {
-            SnackbarMessageQueue.Enqueue("Invalid music selection");
+            ShowMessage("Invalid music selection");
             return;
         }
 
         if (!string.IsNullOrEmpty(music.Url))
         {
             if (!_isDownload)
-                await ShowMusicDetails(music);
+                ShowMusicDetails(music);
             return;
         }
 
@@ -138,7 +151,7 @@ public partial class MainViewModel : ObservableObject
 
             // Convert AudioQuality enum to lowercase string for API parameter
             string qualityLevel = music.AudioQuality.ToString().ToLower();
-            
+
             // Build the API URL with the music ID and quality level
             string apiUrl = $"https://api.kxzjoker.cn/api/163_music?ids={music.Id}&level={qualityLevel}&type=json";
 
@@ -148,7 +161,7 @@ public partial class MainViewModel : ObservableObject
 
             if (response == null || response.Status != 200)
             {
-                SnackbarMessageQueue.Enqueue("Failed to retrieve music details");
+                ShowMessage("Failed to retrieve music details");
                 return;
             }
 
@@ -156,7 +169,7 @@ public partial class MainViewModel : ObservableObject
             //music.Name = response.Name;
             //music.CoverUrl = response.Pic;
             music.Url = response.Url;
-            
+
             // Parse the size (remove "MB" and convert to integer bytes)
             if (!string.IsNullOrEmpty(response.Size) && response.Size.EndsWith("MB"))
             {
@@ -178,15 +191,15 @@ public partial class MainViewModel : ObservableObject
         }
         catch (HttpRequestException ex)
         {
-            SnackbarMessageQueue.Enqueue($"Network error: {ex.Message}");
+            ShowMessage($"Network error: {ex.Message}");
         }
         catch (JsonException ex)
         {
-            SnackbarMessageQueue.Enqueue($"Invalid response format: {ex.Message}");
+            ShowMessage($"Invalid response format: {ex.Message}");
         }
         catch (Exception ex)
         {
-            SnackbarMessageQueue.Enqueue($"An error occurred: {ex.Message}");
+            ShowMessage($"An error occurred: {ex.Message}");
         }
         finally
         {
@@ -194,7 +207,7 @@ public partial class MainViewModel : ObservableObject
         }
 
         if (!_isDownload)
-            await ShowMusicDetails(music);
+            ShowMusicDetails(music);
     }
 
     [RelayCommand]
@@ -202,7 +215,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (music == null)
         {
-            SnackbarMessageQueue.Enqueue("Invalid music selection");
+            ShowMessage("Invalid music selection");
             return;
         }
 
@@ -219,7 +232,7 @@ public partial class MainViewModel : ObservableObject
             }
             catch (Exception ex)
             {
-                SnackbarMessageQueue.Enqueue($"Failed to create directory: {ex.Message}");
+                ShowMessage($"Failed to create directory: {ex.Message}");
                 return;
             }
         }
@@ -236,7 +249,7 @@ public partial class MainViewModel : ObservableObject
 
             if (string.IsNullOrEmpty(music.Url))
             {
-                SnackbarMessageQueue.Enqueue("Music URL is not available, please try again.");
+                ShowMessage("Music URL is not available, please try again.");
                 return;
             }
 
@@ -274,7 +287,7 @@ public partial class MainViewModel : ObservableObject
                 await File.WriteAllBytesAsync(filePath, await response.Content.ReadAsByteArrayAsync());
 
                 // Notify user of success (you might want to use a dialog or notification in a real app)
-                SnackbarMessageQueue.Enqueue($"Download success");
+                ShowMessage($"Download success");
             }
 
             // 写入标签
@@ -282,11 +295,11 @@ public partial class MainViewModel : ObservableObject
         }
         catch (HttpRequestException ex)
         {
-            SnackbarMessageQueue.Enqueue($"Download failed: {ex.Message}");
+            ShowMessage($"Download failed: {ex.Message}");
         }
         catch (Exception ex)
         {
-            SnackbarMessageQueue.Enqueue($"An error occurred: {ex.Message}");
+            ShowMessage($"An error occurred: {ex.Message}");
         }
         finally
         {
@@ -295,11 +308,11 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private async Task ShowMusicDetails(MusicDetail music)
+    private void ShowMusicDetails(MusicDetail music)
     {
         if (music == null)
         {
-            SnackbarMessageQueue.Enqueue("No music details to display");
+            ShowMessage("No music details to display");
             return;
         }
 
@@ -311,16 +324,11 @@ public partial class MainViewModel : ObservableObject
                 DataContext = music
             };
 
-            // Show the dialog using the MaterialDesignInXamlToolkit DialogHost
-            // The "RootDialog" identifier matches the one in MainWindow.xaml
-            await DialogHost.Show(dialogContent, "RootDialog", new DialogClosingEventHandler((s, e) =>
-            {
-                // You can handle any dialog closing logic here if needed
-            }));
+            dialogContent.ShowDialog();
         }
         catch (Exception ex)
         {
-            SnackbarMessageQueue.Enqueue($"Error showing details: {ex.Message}");
+            ShowMessage($"Error showing details: {ex.Message}");
         }
     }
 
@@ -364,11 +372,11 @@ public partial class MainViewModel : ObservableObject
             // 保存更改
             file.Save();
 
-            SnackbarMessageQueue.Enqueue("Tags written successfully");
+            ShowMessage("Tags written successfully");
         }
         catch (Exception ex)
         {
-            SnackbarMessageQueue.Enqueue($"Failed to write tags: {ex.Message}");
+            ShowMessage($"Failed to write tags: {ex.Message}");
         }
     }
 

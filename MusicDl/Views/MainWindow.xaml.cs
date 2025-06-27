@@ -1,19 +1,18 @@
-﻿using MaterialDesignThemes.Wpf;
-using MusicDl.ViewModels;
-using System.Windows;
+﻿using MusicDl.ViewModels;
 
 namespace MusicDl.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow
 {
     public MainWindow()
     {
         InitializeComponent();
 
         var vm = new MainViewModel();
-        
+
         DataContext = vm;
 
-        MainSnackbar.MessageQueue = vm.SnackbarMessageQueue as SnackbarMessageQueue;
+        // Set up Snackbar with WPF-UI
+        vm.SetSnackbarService(MainSnackbar);
     }
 }

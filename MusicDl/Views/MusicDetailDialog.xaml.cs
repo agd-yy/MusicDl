@@ -1,8 +1,6 @@
-﻿using System.Windows.Controls;
+﻿namespace MusicDl.Views;
 
-namespace MusicDl.Views;
-
-public partial class MusicDetailDialog : UserControl
+public partial class MusicDetailDialog
 {
     public MusicDetailDialog()
     {
