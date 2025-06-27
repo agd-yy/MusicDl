@@ -315,6 +315,8 @@ public partial class MainViewModel : ObservableObject
         // 尝试关闭音乐详情窗口
         CloseMusicDetail();
 
+        bool downloadSuccess = false; // 添加下载成功标志
+
         try
         {
             _isDownload = true;
@@ -367,6 +369,11 @@ public partial class MainViewModel : ObservableObject
 
             // 写入标签
             await WriteMusicTag(filePath, music);
+
+            // 如果所有操作都成功完成，标记为下载成功
+            downloadSuccess = true;
+
+            ShowMessage($"'{music.Name}' 下载完成", "下载成功", ControlAppearance.Success);
         }
         catch (HttpRequestException ex)
         {
@@ -380,6 +387,30 @@ public partial class MainViewModel : ObservableObject
         {
             _isDownload = false;
             IsSearching = false;
+
+            // 下载成功后，从播放列表中移除该音乐
+            if (downloadSuccess)
+            {
+                RemoveFromPlaylistById(music.Id);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 根据音乐ID从播放列表中移除音乐
+    /// </summary>
+    /// <param name="musicId">音乐ID</param>
+    private void RemoveFromPlaylistById(string musicId)
+    {
+        if (string.IsNullOrEmpty(musicId))
+            return;
+
+        // 查找播放列表中对应ID的音乐
+        var musicToRemove = Playlist.FirstOrDefault(m => m.Id == musicId);
+        if (musicToRemove != null)
+        {
+            Playlist.Remove(musicToRemove);
+            //ShowMessage($"已从播放列表移除 '{musicToRemove.Name}'", "自动移除", ControlAppearance.Info);
         }
     }
 
@@ -562,7 +593,7 @@ public partial class MainViewModel : ObservableObject
             // 保存更改
             file.Save();
 
-            ShowMessage("标签已经成功添加");
+            //ShowMessage("标签已经成功添加");
         }
         catch (Exception ex)
         {
