@@ -14,6 +14,7 @@
     Width="600"
     Height="800"
     d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+    Activated="FluentWindow_Activated"
     Closing="FluentWindow_Closing"
     FontFamily="Microsoft Yahei"
     Icon="/Resources/CoverImage.png"
@@ -61,6 +62,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <ui:TextBox
+                x:Name="SearchTextBox"
                 VerticalAlignment="Center"
                 PlaceholderText="Please enter the music name."
                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
@@ -80,6 +82,7 @@
         </Grid>
         <!--#endregion-->
 
+        <!--  其余的XAML内容保持不变  -->
         <!--#region Options-->
         <Grid
             Grid.Row="2"

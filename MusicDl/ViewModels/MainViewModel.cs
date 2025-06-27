@@ -564,6 +564,7 @@ public partial class MainViewModel : ObservableObject
             file.Tag.Performers = [.. music.Artist.Select(a => a.Name)];
             file.Tag.Album = music.Album.Name;
             file.Tag.Lyrics = music.Lyric;
+            file.Tag.Description = "@zggsong";
 
             // Year
             if (DateTime.TryParse(music.Album.PublishTime, out DateTime date) && date.Year != 1970)
