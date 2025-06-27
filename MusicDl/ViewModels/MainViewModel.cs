@@ -66,6 +66,12 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isPlaylistVisible = false;
 
+    [ObservableProperty]
+    private bool _isMusicDetailVisible = false;
+
+    [ObservableProperty]
+    private MusicDetail? _selectedMusicDetail = null;
+
     private bool _isDownload = false;
 
     #region 配置管理
@@ -306,6 +312,9 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
+        // 尝试关闭音乐详情窗口
+        CloseMusicDetail();
+
         try
         {
             _isDownload = true;
@@ -413,6 +422,10 @@ public partial class MainViewModel : ObservableObject
         }
 
         Playlist.Add(musicCopy);
+
+        // 尝试关闭音乐详情窗口
+        CloseMusicDetail();
+
         ShowMessage($"已添加 '{music.Name}' 到播放列表", "成功", ControlAppearance.Success);
     }
 
@@ -490,6 +503,13 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private void CloseMusicDetail()
+    {
+        IsMusicDetailVisible = false;
+        SelectedMusicDetail = null;
+    }
+
     private void ShowMusicDetails(MusicDetail music)
     {
         if (music == null)
@@ -498,21 +518,8 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        try
-        {
-            // Create the dialog content
-            var dialogContent = new Views.MusicDetailDialog
-            {
-                DataContext = music,
-                Owner = System.Windows.Application.Current.MainWindow,
-            };
-
-            dialogContent.ShowDialog();
-        }
-        catch (Exception ex)
-        {
-            ShowMessage($"显示错误详情: {ex.Message}", "错误", ControlAppearance.Danger);
-        }
+        SelectedMusicDetail = music;
+        IsMusicDetailVisible = true;
     }
 
     private async Task WriteMusicTag(string filePath, MusicDetail music)

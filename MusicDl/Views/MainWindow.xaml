@@ -25,6 +25,17 @@
         <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="ui:Button">
             <Setter Property="Cursor" Value="Hand" />
         </Style>
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,12,0,6" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+        </Style>
+        <Style x:Key="InfoLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+        </Style>
     </ui:FluentWindow.Resources>
 
     <Grid>
@@ -339,6 +350,285 @@
         </ui:Button>
         <!--#endregion-->
 
+        <!--#region Music Detail Panel-->
+        <Border
+            Grid.Row="1"
+            Grid.RowSpan="3"
+            Margin="15"
+            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="12"
+            DataContext="{Binding SelectedMusicDetail}"
+            Visibility="{Binding DataContext.IsMusicDetailVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={cnvts:BooleanToVisibilityConverter}}">
+            <Border.Effect>
+                <DropShadowEffect
+                    BlurRadius="20"
+                    Direction="270"
+                    Opacity="0.4"
+                    ShadowDepth="5" />
+            </Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  Header  -->
+                <Grid Grid.Row="0" Margin="20,20,20,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        FontSize="22"
+                        FontWeight="SemiBold"
+                        Text="音乐详情" />
+                    <ui:Button
+                        Grid.Column="1"
+                        Command="{Binding DataContext.CloseMusicDetailCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        Icon="{ui:SymbolIcon Dismiss24}"
+                        ToolTip="关闭" />
+                </Grid>
+
+                <!--  Content  -->
+                <ScrollViewer
+                    Grid.Row="1"
+                    Margin="20,0"
+                    VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!--  Header with Cover and Basic Info  -->
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!--  Cover Image  -->
+                            <Border
+                                Width="130"
+                                Height="130"
+                                ClipToBounds="True"
+                                CornerRadius="8">
+                                <Border.Effect>
+                                    <DropShadowEffect
+                                        BlurRadius="8"
+                                        Direction="270"
+                                        Opacity="0.3"
+                                        ShadowDepth="3" />
+                                </Border.Effect>
+                                <Image Stretch="UniformToFill">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Setter Property="Source" Value="{Binding CoverUrl}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CoverUrl}" Value="{x:Null}">
+                                                    <Setter Property="Source" Value="{StaticResource DefaultCoverImage}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding CoverUrl}" Value="">
+                                                    <Setter Property="Source" Value="{StaticResource DefaultCoverImage}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                            </Border>
+
+                            <!--  Basic Info  -->
+                            <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                                <TextBlock
+                                    FontSize="22"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding Name}"
+                                    TextWrapping="Wrap" />
+
+                                <!--  Duration  -->
+                                <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                                    <ui:SymbolIcon
+                                        VerticalAlignment="Center"
+                                        Foreground="{DynamicResource SystemAccentColorBrush}"
+                                        Symbol="Clock24" />
+                                    <TextBlock
+                                        Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="14"
+                                        Text="{Binding Duration}" />
+                                </StackPanel>
+
+                                <!--  Quality & Size  -->
+                                <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                                    <Border
+                                        Padding="8,4"
+                                        Background="{DynamicResource SystemAccentColorBrush}"
+                                        CornerRadius="6">
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Foreground="White"
+                                            Text="{Binding AudioQuality, Converter={cnvts:AudioQualityConverter}}" />
+                                    </Border>
+                                    <TextBlock
+                                        Margin="12,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="14"
+                                        Text="{Binding Size, Converter={cnvts:FileSizeConverter}}" />
+
+                                    <!--  VIP Badge  -->
+                                    <Border
+                                        Margin="12,0,0,0"
+                                        Padding="6,2"
+                                        Background="{DynamicResource SystemAccentColorDark1Brush}"
+                                        CornerRadius="4"
+                                        Visibility="{Binding IsMember, Converter={cnvts:BooleanToVisibilityConverter}}">
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Foreground="White"
+                                            Text="VIP" />
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+
+                        <!--  Artists Section  -->
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="艺术家" />
+                            <ItemsControl ItemsSource="{Binding Artist}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            Margin="0,4"
+                                            Padding="12,8"
+                                            Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                            CornerRadius="6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <ui:SymbolIcon
+                                                    VerticalAlignment="Center"
+                                                    Foreground="{DynamicResource SystemAccentColorBrush}"
+                                                    Symbol="Person24" />
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    Margin="10,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    FontSize="14"
+                                                    Text="{Binding Name}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <!--  Album Section  -->
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="专辑信息" />
+                            <Border
+                                Padding="12,10"
+                                Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                CornerRadius="6">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:SymbolIcon
+                                            VerticalAlignment="Center"
+                                            Foreground="{DynamicResource SystemAccentColorBrush}"
+                                            Symbol="Album24" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="10,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontSize="14"
+                                            FontWeight="Medium"
+                                            Text="{Binding Album.Name}" />
+                                    </Grid>
+                                    <Grid Visibility="{Binding Album.PublishTime, Converter={cnvts:StringToVisibilityConverter}}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:SymbolIcon
+                                            VerticalAlignment="Center"
+                                            Foreground="{DynamicResource SystemAccentColorBrush}"
+                                            Symbol="CalendarLtr24" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="10,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Style="{StaticResource InfoLabel}"
+                                            Text="{Binding Album.PublishTime}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!--  URL Section  -->
+                        <StackPanel Margin="0,0,0,16" Visibility="{Binding Url, Converter={cnvts:StringToVisibilityConverter}}">
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="音乐链接" />
+                            <ui:TextBox
+                                IsReadOnly="True"
+                                Text="{Binding Url, Mode=OneWay}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <!--  Lyrics Section  -->
+                        <StackPanel Visibility="{Binding Lyric, Converter={cnvts:StringToVisibilityConverter}}">
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="歌词" />
+                            <Border
+                                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <ScrollViewer MaxHeight="250" VerticalScrollBarVisibility="Auto">
+                                    <TextBlock
+                                        Padding="16"
+                                        FontSize="13"
+                                        LineHeight="20"
+                                        Text="{Binding Lyric}"
+                                        TextWrapping="Wrap" />
+                                </ScrollViewer>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!--  Action Buttons  -->
+                <Grid Grid.Row="2" Margin="20,10,20,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <ui:Button
+                        Grid.Column="1"
+                        Margin="0,0,10,0"
+                        Padding="16,10"
+                        Appearance="Success"
+                        Command="{Binding DataContext.AddCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        CommandParameter="{Binding .}"
+                        Content="添加到列表"
+                        Icon="{ui:SymbolIcon Symbol=Add24}" />
+
+                    <ui:Button
+                        Grid.Column="2"
+                        Padding="16,10"
+                        Appearance="Primary"
+                        Command="{Binding DataContext.DownloadCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        CommandParameter="{Binding .}"
+                        Content="立即下载"
+                        Icon="{ui:SymbolIcon Symbol=ArrowDownload24}" />
+                </Grid>
+            </Grid>
+        </Border>
+        <!--#endregion-->
+
         <!--#region Playlist Panel-->
         <Border
             Grid.Row="1"
@@ -353,6 +643,7 @@
                 <DropShadowEffect
                     BlurRadius="15"
                     Direction="270"
+                    Opacity="0.3"
                     ShadowDepth="3" />
             </Border.Effect>
             <Grid>
