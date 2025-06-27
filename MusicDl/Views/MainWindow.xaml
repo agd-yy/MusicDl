@@ -75,8 +75,8 @@
             Margin="5,0"
             VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
             <ComboBox ItemsSource="{Binding LimitOptions}" SelectedItem="{Binding SelectedLimit}" />
@@ -316,6 +316,195 @@
         </ListBox>
         <!--#endregion-->
 
+        <!--#region Floating Playlist Button-->
+        <ui:Button
+            Grid.Row="3"
+            Width="60"
+            Height="60"
+            Margin="20"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Appearance="Primary"
+            Command="{Binding TogglePlaylistCommand}"
+            CornerRadius="30"
+            Icon="{ui:SymbolIcon MusicNote224}"
+            ToolTip="播放列表">
+            <ui:Button.Effect>
+                <DropShadowEffect
+                    BlurRadius="10"
+                    Direction="270"
+                    Opacity="0.3"
+                    ShadowDepth="2" />
+            </ui:Button.Effect>
+        </ui:Button>
+        <!--#endregion-->
+
+        <!--#region Playlist Panel-->
+        <Border
+            Grid.Row="1"
+            Grid.RowSpan="3"
+            Margin="10"
+            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="8"
+            Visibility="{Binding IsPlaylistVisible, Converter={cnvts:BooleanToVisibilityConverter}}">
+            <Border.Effect>
+                <DropShadowEffect
+                    BlurRadius="15"
+                    Direction="270"
+                    ShadowDepth="3" />
+            </Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!--  Header  -->
+                <Grid Grid.Row="0" Margin="15,15,15,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        FontSize="20"
+                        FontWeight="SemiBold"
+                        Text="播放列表" />
+                    <ui:Button
+                        Grid.Column="1"
+                        Command="{Binding TogglePlaylistCommand}"
+                        Icon="{ui:SymbolIcon Dismiss24}"
+                        ToolTip="关闭" />
+                </Grid>
+
+                <!--  Action Buttons  -->
+                <StackPanel
+                    Grid.Row="1"
+                    Margin="15,0,15,10"
+                    Orientation="Horizontal">
+                    <ui:Button
+                        Appearance="Success"
+                        Command="{Binding DownloadAllPlaylistCommand}"
+                        Content="全部下载"
+                        Icon="{ui:SymbolIcon ArrowDownload24}" />
+                    <ui:Button
+                        Margin="10,0,0,0"
+                        Appearance="Caution"
+                        Command="{Binding ClearPlaylistCommand}"
+                        Content="清空列表"
+                        Icon="{ui:SymbolIcon Delete24}" />
+                    <TextBlock
+                        Margin="15,0,0,0"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        Opacity="0.7"
+                        Text="{Binding Playlist.Count, StringFormat='共 {0} 首'}" />
+                </StackPanel>
+
+                <!--  Playlist Items  -->
+                <ListBox
+                    Grid.Row="2"
+                    Margin="10,0,10,10"
+                    HorizontalContentAlignment="Stretch"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    ItemsSource="{Binding Playlist}"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="0,2" />
+                            <Setter Property="Margin" Value="0,2" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <ContentPresenter
+                                            Margin="{TemplateBinding Padding}"
+                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border
+                                Margin="0,2"
+                                Padding="10"
+                                Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!--  Cover Image  -->
+                                    <Border
+                                        Width="40"
+                                        Height="40"
+                                        Margin="0,0,8,0"
+                                        ClipToBounds="True"
+                                        CornerRadius="4">
+                                        <Image Stretch="UniformToFill">
+                                            <Image.Style>
+                                                <Style TargetType="Image">
+                                                    <Setter Property="Source" Value="{Binding CoverUrl}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding CoverUrl}" Value="{x:Null}">
+                                                            <Setter Property="Source" Value="{StaticResource DefaultCoverImage}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding CoverUrl}" Value="">
+                                                            <Setter Property="Source" Value="{StaticResource DefaultCoverImage}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Image.Style>
+                                        </Image>
+                                    </Border>
+
+                                    <!--  Music Info  -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock
+                                            FontSize="14"
+                                            FontWeight="Medium"
+                                            Text="{Binding Name}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <TextBlock
+                                            FontSize="11"
+                                            Opacity="0.7"
+                                            Text="{Binding Artist[0].Name}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+
+                                    <!--  Action Buttons  -->
+                                    <StackPanel
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        Orientation="Horizontal">
+                                        <ui:Button
+                                            Appearance="Danger"
+                                            Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.RemoveFromPlaylistCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Icon="{ui:SymbolIcon Delete24}"
+                                            ToolTip="从播放列表移除" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+        <!--#endregion-->
+
         <!--#region ProcessBar-->
         <!--  Loading Indicator  -->
         <ui:ProgressRing
@@ -331,8 +520,6 @@
             Grid.Row="1"
             Grid.RowSpan="3"
             VerticalAlignment="Bottom" />
-        <!--<ui:SnackbarPresenter x:Name="SnackbarPresenter" />
-    <ContentPresenter x:Name="RootContentDialog" />-->
         <!--#endregion-->
     </Grid>
 </ui:FluentWindow>

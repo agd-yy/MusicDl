@@ -59,6 +59,13 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<MusicDetail> _musicDetails = [];
 
+    // 添加播放列表集合
+    [ObservableProperty]
+    private ObservableCollection<MusicDetail> _playlist = [];
+
+    [ObservableProperty]
+    private bool _isPlaylistVisible = false;
+
     private bool _isDownload = false;
 
     #region 配置管理
@@ -370,7 +377,117 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void Add(MusicDetail music)
     {
-        ShowMessage("敬请期待", "提示", ControlAppearance.Caution);
+        if (music == null)
+        {
+            ShowMessage("无效的音乐选择", "错误", ControlAppearance.Danger);
+            return;
+        }
+
+        // 检查是否已经存在于播放列表中
+        var existingMusic = Playlist.FirstOrDefault(m => m.Id == music.Id);
+        if (existingMusic != null)
+        {
+            ShowMessage("音乐已存在于播放列表中", "提示", ControlAppearance.Caution);
+            return;
+        }
+
+        // 创建一个副本以避免引用问题
+        var musicCopy = new MusicDetail
+        {
+            Id = music.Id,
+            Name = music.Name,
+            CoverUrl = music.CoverUrl,
+            IsMember = music.IsMember,
+            AudioQuality = music.AudioQuality,
+            Duration = music.Duration,
+            Url = music.Url,
+            Size = music.Size,
+            Lyric = music.Lyric,
+            Album = music.Album
+        };
+
+        // 复制艺术家信息
+        foreach (var artist in music.Artist)
+        {
+            musicCopy.Artist.Add(artist);
+        }
+
+        Playlist.Add(musicCopy);
+        ShowMessage($"已添加 '{music.Name}' 到播放列表", "成功", ControlAppearance.Success);
+    }
+
+    [RelayCommand]
+    private void TogglePlaylist()
+    {
+        IsPlaylistVisible = !IsPlaylistVisible;
+    }
+
+    [RelayCommand]
+    private void RemoveFromPlaylist(MusicDetail music)
+    {
+        if (music != null && Playlist.Contains(music))
+        {
+            Playlist.Remove(music);
+            ShowMessage($"已从播放列表移除 '{music.Name}'", "成功", ControlAppearance.Success);
+        }
+    }
+
+    [RelayCommand]
+    private void ClearPlaylist()
+    {
+        if (Playlist.Count == 0)
+        {
+            ShowMessage("播放列表已为空", "提示", ControlAppearance.Caution);
+            return;
+        }
+
+        Playlist.Clear();
+        ShowMessage("播放列表已清空", "成功", ControlAppearance.Success);
+    }
+
+    [RelayCommand]
+    private async Task DownloadAllPlaylistAsync()
+    {
+        if (Playlist.Count == 0)
+        {
+            ShowMessage("播放列表为空，无法下载", "提示", ControlAppearance.Caution);
+            return;
+        }
+
+        try
+        {
+            IsSearching = true;
+            int totalCount = Playlist.Count;
+            int successCount = 0;
+            int failedCount = 0;
+
+            ShowMessage($"开始下载播放列表中的 {totalCount} 首音乐", "开始下载", ControlAppearance.Info);
+
+            foreach (var music in Playlist.ToList())
+            {
+                try
+                {
+                    await DownloadAsync(music);
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    failedCount++;
+                    ShowMessage($"下载 '{music.Name}' 失败: {ex.Message}", "下载失败", ControlAppearance.Danger);
+                }
+            }
+
+            string message = $"批量下载完成！成功: {successCount}，失败: {failedCount}";
+            ShowMessage(message, "下载完成", successCount > 0 ? ControlAppearance.Success : ControlAppearance.Caution);
+        }
+        catch (Exception ex)
+        {
+            ShowMessage($"批量下载时发生错误: {ex.Message}", "错误", ControlAppearance.Danger);
+        }
+        finally
+        {
+            IsSearching = false;
+        }
     }
 
     private void ShowMusicDetails(MusicDetail music)
