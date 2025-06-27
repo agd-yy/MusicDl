@@ -14,6 +14,7 @@
     Width="600"
     Height="800"
     d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+    Closing="FluentWindow_Closing"
     FontFamily="Microsoft Yahei"
     Icon="/Resources/CoverImage.png"
     WindowStartupLocation="CenterScreen"
@@ -35,7 +36,11 @@
         </Grid.RowDefinitions>
 
         <!--#region Title-->
-        <ui:TitleBar Title="MusicDl" IsHitTestVisible="True" />
+        <ui:TitleBar Title="MusicDl" IsHitTestVisible="True">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="{DynamicResource DefaultCoverImage}" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
         <!--#endregion-->
 
         <!--#region Search-->
@@ -55,9 +60,11 @@
             <ui:Button
                 Grid.Column="1"
                 Margin="8,0,0,0"
+                Appearance="Primary"
                 Command="{Binding SearchCommand}"
                 Content="Search"
                 FontWeight="Bold"
+                Icon="{ui:SymbolIcon Search12}"
                 IsEnabled="{Binding IsSearching, Converter={cnvts:InverseBooleanConverter}}" />
         </Grid>
         <!--#endregion-->
@@ -248,7 +255,7 @@
                                 <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
                                     <Border
                                         Padding="6,2"
-                                        Background="{DynamicResource SystemAccentColorLight1Brush}"
+                                        Background="Black"
                                         CornerRadius="4">
                                         <TextBlock
                                             FontSize="10"
@@ -297,6 +304,8 @@
                                     ToolTip="Download" />
                                 <ui:Button
                                     Appearance="Info"
+                                    Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.AddCommand}"
+                                    CommandParameter="{Binding .}"
                                     Icon="{ui:SymbolIcon Symbol=Add24}"
                                     ToolTip="Add to Playlist" />
                             </StackPanel>

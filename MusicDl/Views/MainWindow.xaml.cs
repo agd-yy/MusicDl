@@ -4,15 +4,20 @@ namespace MusicDl.Views;
 
 public partial class MainWindow
 {
+    private MainViewModel _vm = new();
+
     public MainWindow()
     {
         InitializeComponent();
 
-        var vm = new MainViewModel();
-
-        DataContext = vm;
+        DataContext = _vm;
 
         // Set up Snackbar with WPF-UI
-        vm.SetSnackbarService(MainSnackbar);
+        _vm.SetSnackbarService(MainSnackbar);
+    }
+
+    private void FluentWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        _vm.SaveConfig();
     }
 }

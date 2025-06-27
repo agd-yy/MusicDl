@@ -8,13 +8,18 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:MusicDl.Models"
+    x:Name="Dialog"
     Width="500"
     Height="600"
     d:DataContext="{d:DesignInstance Type=vm:MusicDetail}"
+    WindowStartupLocation="CenterOwner"
     mc:Ignorable="d">
 
     <ui:FluentWindow.Resources>
         <BitmapImage x:Key="DefaultCoverImage" UriSource="/Resources/CoverImage.png" />
+        <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="ui:Button">
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
         <Style x:Key="SectionTitle" TargetType="TextBlock">
             <Setter Property="Margin" Value="0,8,0,4" />
             <Setter Property="FontWeight" Value="Medium" />
@@ -26,8 +31,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <ui:TitleBar Title="{Binding Name}" IsHitTestVisible="True" />
+        <ui:TitleBar Title="Music Detail" IsHitTestVisible="True">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="{StaticResource DefaultCoverImage}" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <Grid Margin="16">
                 <Grid.RowDefinitions>
@@ -89,7 +99,7 @@
                         <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
                             <Border
                                 Padding="6,2"
-                                Background="{DynamicResource SystemAccentColorLight1Brush}"
+                                Background="Black"
                                 CornerRadius="4">
                                 <TextBlock Foreground="White" Text="{Binding AudioQuality, Converter={cnvts:AudioQualityConverter}}" />
                             </Border>
@@ -203,5 +213,21 @@
                 </StackPanel>
             </Grid>
         </ScrollViewer>
+
+        <!--  下载按钮区域  -->
+        <Grid Grid.Row="2" Margin="16,8,16,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <ui:Button
+                Grid.Column="1"
+                Padding="16,8"
+                Appearance="Primary"
+                Click="DownloadButton_Click"
+                Content="Download"
+                Icon="{ui:SymbolIcon Symbol=ArrowDownload24}" />
+        </Grid>
     </Grid>
 </ui:FluentWindow>

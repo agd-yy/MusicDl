@@ -2,11 +2,11 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using MusicDl.Models;
+using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text.Json;
 using System.Web;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
@@ -16,15 +16,26 @@ namespace MusicDl.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     private ISnackbarService _snackbarService = new SnackbarService();
+    private readonly string _configFilePath;
+
+    public MainViewModel()
+    {
+        // 配置文件路径
+        var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        _configFilePath = Path.Combine(appDirectory, "config.json");
+
+        // 加载配置
+        LoadConfig();
+    }
 
     public void SetSnackbarService(SnackbarPresenter snackbarPresenter)
     {
         _snackbarService.SetSnackbarPresenter(snackbarPresenter);
     }
 
-    private void ShowMessage(string message)
+    private void ShowMessage(string message, string title = "通知", ControlAppearance appearance = ControlAppearance.Primary)
     {
-        _snackbarService?.Show("Info", message, ControlAppearance.Secondary, null, TimeSpan.FromSeconds(3));
+        _snackbarService?.Show(title, message, appearance, null, TimeSpan.FromSeconds(3));
     }
 
     [ObservableProperty]
@@ -50,6 +61,59 @@ public partial class MainViewModel : ObservableObject
 
     private bool _isDownload = false;
 
+    #region 配置管理
+
+    /// <summary>
+    /// 加载配置
+    /// </summary>
+    private void LoadConfig()
+    {
+        try
+        {
+            if (File.Exists(_configFilePath))
+            {
+                var json = File.ReadAllText(_configFilePath);
+                var config = JsonConvert.DeserializeObject<AppConfig>(json);
+
+                if (config != null)
+                {
+                    SelectedLimit = config.SelectedLimit;
+                    SelectedAudioQuality = config.SelectedAudioQuality;
+                    SaveDirectoryPath = config.SaveDirectoryPath;
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Ignore any errors during loading
+        }
+    }
+
+    /// <summary>
+    /// 保存配置
+    /// </summary>
+    public void SaveConfig()
+    {
+        try
+        {
+            var config = new AppConfig
+            {
+                SelectedLimit = SelectedLimit,
+                SelectedAudioQuality = SelectedAudioQuality,
+                SaveDirectoryPath = SaveDirectoryPath
+            };
+
+            var json = JsonConvert.SerializeObject(config, Formatting.Indented);
+            File.WriteAllText(_configFilePath, json);
+        }
+        catch (Exception ex)
+        {
+            ShowMessage($"保存配置失败: {ex.Message}", "错误", ControlAppearance.Danger);
+        }
+    }
+
+    #endregion
+
     [RelayCommand]
     private void SelectSaveDirectory()
     {
@@ -70,7 +134,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ShowMessage($"Could not open folder dialog: {ex.Message}");
+            ShowMessage($"无法打开文件夹对话框: {ex.Message}", "错误", ControlAppearance.Danger);
         }
     }
 
@@ -79,7 +143,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(SearchText))
         {
-            ShowMessage("Please enter a search term");
+            ShowMessage("请输入搜索关键词", "错误", ControlAppearance.Danger);
             return;
         }
 
@@ -98,7 +162,7 @@ public partial class MainViewModel : ObservableObject
 
             if (response == null || response.Data == null)
             {
-                ShowMessage("No results found");
+                ShowMessage("未找到结果", "错误", ControlAppearance.Danger);
                 return;
             }
 
@@ -110,15 +174,15 @@ public partial class MainViewModel : ObservableObject
         }
         catch (HttpRequestException ex)
         {
-            ShowMessage($"Network error: {ex.Message}");
+            ShowMessage($"网络错误: {ex.Message}", "错误", ControlAppearance.Danger);
         }
         catch (JsonException ex)
         {
-            ShowMessage($"Invalid response format: {ex.Message}");
+            ShowMessage($"无效响应格式: {ex.Message}", "错误", ControlAppearance.Danger);
         }
         catch (Exception ex)
         {
-            ShowMessage($"An error occurred: {ex.Message}");
+            ShowMessage($"发生了错误: {ex.Message}", "错误", ControlAppearance.Danger);
         }
         finally
         {
@@ -126,14 +190,12 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-
-
     [RelayCommand]
     private async Task ParseAsync(MusicDetail music)
     {
         if (music == null || string.IsNullOrEmpty(music.Id))
         {
-            ShowMessage("Invalid music selection");
+            ShowMessage("无效的音乐选择", "错误", ControlAppearance.Danger);
             return;
         }
 
@@ -161,7 +223,7 @@ public partial class MainViewModel : ObservableObject
 
             if (response == null || response.Status != 200)
             {
-                ShowMessage("Failed to retrieve music details");
+                ShowMessage("未成功获取音乐详情", "错误", ControlAppearance.Danger);
                 return;
             }
 
@@ -191,15 +253,15 @@ public partial class MainViewModel : ObservableObject
         }
         catch (HttpRequestException ex)
         {
-            ShowMessage($"Network error: {ex.Message}");
+            ShowMessage($"网络错误: {ex.Message}", "错误", ControlAppearance.Danger);
         }
         catch (JsonException ex)
         {
-            ShowMessage($"Invalid response format: {ex.Message}");
+            ShowMessage($"无效响应格式: {ex.Message}", "错误", ControlAppearance.Danger);
         }
         catch (Exception ex)
         {
-            ShowMessage($"An error occurred: {ex.Message}");
+            ShowMessage($"出现了错误: {ex.Message}", "错误", ControlAppearance.Danger);
         }
         finally
         {
@@ -215,7 +277,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (music == null)
         {
-            ShowMessage("Invalid music selection");
+            ShowMessage("无效的音乐选择", "错误", ControlAppearance.Danger);
             return;
         }
 
@@ -232,7 +294,7 @@ public partial class MainViewModel : ObservableObject
             }
             catch (Exception ex)
             {
-                ShowMessage($"Failed to create directory: {ex.Message}");
+                ShowMessage($"创建目录失败: {ex.Message}", "错误", ControlAppearance.Danger);
                 return;
             }
         }
@@ -249,7 +311,7 @@ public partial class MainViewModel : ObservableObject
 
             if (string.IsNullOrEmpty(music.Url))
             {
-                ShowMessage("Music URL is not available, please try again.");
+                ShowMessage("音乐URL不可用，请再试一次。", "错误", ControlAppearance.Danger);
                 return;
             }
 
@@ -285,9 +347,6 @@ public partial class MainViewModel : ObservableObject
             if (!File.Exists(filePath))
             {
                 await File.WriteAllBytesAsync(filePath, await response.Content.ReadAsByteArrayAsync());
-
-                // Notify user of success (you might want to use a dialog or notification in a real app)
-                ShowMessage($"Download success");
             }
 
             // 写入标签
@@ -295,11 +354,11 @@ public partial class MainViewModel : ObservableObject
         }
         catch (HttpRequestException ex)
         {
-            ShowMessage($"Download failed: {ex.Message}");
+            ShowMessage($"下载失败: {ex.Message}", "错误", ControlAppearance.Danger);
         }
         catch (Exception ex)
         {
-            ShowMessage($"An error occurred: {ex.Message}");
+            ShowMessage($"下载时发生了一个错误: {ex.Message}", "错误", ControlAppearance.Danger);
         }
         finally
         {
@@ -308,11 +367,17 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private void Add(MusicDetail music)
+    {
+        ShowMessage("敬请期待", "提示", ControlAppearance.Caution);
+    }
+
     private void ShowMusicDetails(MusicDetail music)
     {
         if (music == null)
         {
-            ShowMessage("No music details to display");
+            ShowMessage("暂无音乐详情显示", "错误", ControlAppearance.Danger);
             return;
         }
 
@@ -321,14 +386,15 @@ public partial class MainViewModel : ObservableObject
             // Create the dialog content
             var dialogContent = new Views.MusicDetailDialog
             {
-                DataContext = music
+                DataContext = music,
+                Owner = System.Windows.Application.Current.MainWindow,
             };
 
             dialogContent.ShowDialog();
         }
         catch (Exception ex)
         {
-            ShowMessage($"Error showing details: {ex.Message}");
+            ShowMessage($"显示错误详情: {ex.Message}", "错误", ControlAppearance.Danger);
         }
     }
 
@@ -372,11 +438,11 @@ public partial class MainViewModel : ObservableObject
             // 保存更改
             file.Save();
 
-            ShowMessage("Tags written successfully");
+            ShowMessage("标签已经成功添加");
         }
         catch (Exception ex)
         {
-            ShowMessage($"Failed to write tags: {ex.Message}");
+            ShowMessage($"标签写入失败: {ex.Message}", "错误", ControlAppearance.Danger);
         }
     }
 
