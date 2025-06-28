@@ -336,26 +336,14 @@ public partial class MainViewModel : ObservableObject
             // Indicate that we're working
             IsSearching = true;
 
-            // Create a new HttpClient for downloading
-            using var downloadClient = new HttpClient();
-
-            // Download the music file
-            var response = await downloadClient.GetAsync(music.Url);
-            response.EnsureSuccessStatusCode();
-
-            // Get file extension from the header
-            string fileExtension = ".mp3"; // Default extension
-            if (response.Headers.TryGetValues("x-nos-object-name", out var values))
+            // 通过uri最后文件类型后缀获取文件类型：
+            // https://m701.music.126.net/20250628150919/b010fae61a5638192945a851cb87446d/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/28558602729/951a/e6c8/02dd/94b8c66b3bb356b36f82b7ea1e4378c9.flac?vuutv=DqrYdBQCvognjByymOfMIagWEqn66F+U9JXv9V7pEA7rJJfLnSWiGulftqIu/feQCcJNsxKXyHQ+qb3/H/j3/oKzVJviqTsPP+Apw6o4Wp8=
+            var uri = new Uri(music.Url);
+            string fileExtension = Path.GetExtension(uri.LocalPath);
+            if (string.IsNullOrEmpty(fileExtension))
             {
-                string objectName = values.FirstOrDefault() ?? string.Empty;
-                // Extract file extension from the object name
-                int lastDotIndex = objectName.LastIndexOf('.');
-                if (lastDotIndex >= 0 && lastDotIndex < objectName.Length - 1)
-                {
-                    fileExtension = objectName.Substring(lastDotIndex);
-                }
+                fileExtension = ".mp3"; // 默认使用mp3后缀
             }
-
             // Get the file name from the URL and use the correct extension
             string fileName = $"{string.Join("_", music.Artist.Select(x => x.Name))}-{music.Name}{fileExtension}";
 
@@ -368,23 +356,38 @@ public partial class MainViewModel : ObservableObject
                 var newDir = Path.Combine(SaveDirectoryPath, artistName, albumName);
                 if (!Directory.Exists(newDir))
                     Directory.CreateDirectory(newDir);
-                
+
                 filePath = Path.Combine(SaveDirectoryPath, artistName, albumName, fileName);
             }
-
             // 判断文件是否存在
             if (!File.Exists(filePath))
             {
+                // Create a new HttpClient for downloading
+                using var downloadClient = new HttpClient();
+
+                // Download the music file
+                var response = await downloadClient.GetAsync(music.Url);
+                
+                response.EnsureSuccessStatusCode();
                 await File.WriteAllBytesAsync(filePath, await response.Content.ReadAsByteArrayAsync());
             }
 
-            // 写入标签
-            await WriteMusicTag(filePath, music);
+            bool isAlreadyExists = true;
+            // 检查音乐标签是否已经存在
+            if (!CheckMusicTagExists(filePath, music))
+            {
+                isAlreadyExists = false;
+                await WriteMusicTag(filePath, music);
+            }
 
             // 如果所有操作都成功完成，标记为下载成功
             downloadSuccess = true;
 
-            ShowMessage($"'{filePath}' 下载完成", "下载成功", ControlAppearance.Success);
+            var msg = isAlreadyExists
+                ? $"'{filePath}' 已存在"
+                : $"'{filePath}' 下载完成，标签已添加";
+
+            ShowMessage(msg, "下载成功", ControlAppearance.Success);
         }
         catch (HttpRequestException ex)
         {
@@ -562,6 +565,30 @@ public partial class MainViewModel : ObservableObject
 
         SelectedMusicDetail = music;
         IsMusicDetailVisible = true;
+    }
+
+    // 检查音乐标签是否已经存在
+    private bool CheckMusicTagExists(string filePath, MusicDetail music)
+    {
+        // 使用 TagLibSharp 库来检查音乐标签
+        try
+        {
+            var file = TagLib.File.Create(filePath);
+            // 检查标题是否匹配
+            if (file.Tag.Title == music.Name &&
+                file.Tag.Performers.SequenceEqual(music.Artist.Select(a => a.Name)) &&
+                file.Tag.Album == music.Album.Name &&
+                file.Tag.Lyrics == music.Lyric &&
+                file.Tag.Description == "@zggsong")
+            {
+                return true; // 标签已存在
+            }
+        }
+        catch (Exception)
+        {
+            // Ignore any errors during tag checking
+        }
+        return false; // 标签不存在
     }
 
     private async Task WriteMusicTag(string filePath, MusicDetail music)
