@@ -6,6 +6,7 @@
     <UseWPF>true</UseWPF>
 	<BaseOutputPath>..\bin\</BaseOutputPath>
 	<ApplicationIcon>Resources\favicon.ico</ApplicationIcon>
+	<ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <!--// Release 模式下禁用 Debug 信息 //-->
