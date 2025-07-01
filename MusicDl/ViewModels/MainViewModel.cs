@@ -168,14 +168,14 @@ public partial class MainViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(SearchText))
         {
-            ShowMessage("请输入搜索关键词", "错误", ControlAppearance.Danger);
+            MusicDetails.Clear();
+            ShowMessage("请输入搜索关键词", "提示", ControlAppearance.Info);
             return;
         }
 
         try
         {
             IsSearching = true;
-            MusicDetails.Clear();
 
             // Build the API URL with the search text and selected limit
             string encodedSearchText = HttpUtility.UrlEncode(SearchText);

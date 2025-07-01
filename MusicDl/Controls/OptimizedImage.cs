@@ -23,7 +23,8 @@ public class OptimizedImage : Image
 
     static OptimizedImage()
     {
-        _cacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MusicDl", "ImageCache");
+        //_cacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MusicDl", "ImageCache");
+        _cacheDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
         Directory.CreateDirectory(_cacheDirectory);
 
         // 应用启动时清理缓存
