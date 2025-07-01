@@ -91,6 +91,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100" />
                 <ColumnDefinition Width="130" />
+                <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
             <ComboBox ItemsSource="{Binding LimitOptions}" SelectedItem="{Binding SelectedLimit}" />
@@ -100,9 +101,15 @@
                 ItemsSource="{Binding Source={ext:Enumeration {x:Type model:AudioQuality}}}"
                 SelectedValue="{Binding SelectedAudioQuality}"
                 SelectedValuePath="Value" />
+            <ComboBox
+                Grid.Column="2"
+                DisplayMemberPath="Description"
+                ItemsSource="{Binding Source={ext:Enumeration {x:Type model:SaveType}}}"
+                SelectedValue="{Binding SelectedSaveType}"
+                SelectedValuePath="Value" />
 
             <ui:TextBox
-                Grid.Column="2"
+                Grid.Column="3"
                 Cursor="Hand"
                 IsReadOnly="True"
                 PlaceholderText="Save location"

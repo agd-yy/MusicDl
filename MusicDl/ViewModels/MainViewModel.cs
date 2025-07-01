@@ -48,10 +48,13 @@ public partial class MainViewModel : ObservableObject
     private int _selectedLimit = 10;
 
     [ObservableProperty]
-    private List<int> _limitOptions = [1, 10, 15, 20, 30, 50, 100];
+    private List<int> _limitOptions = [1, 2, 5, 10, 15, 20, 30, 50, 100];
 
     [ObservableProperty]
     private AudioQuality _selectedAudioQuality = AudioQuality.Lossless;
+
+    [ObservableProperty]
+    private SaveType _selectedSaveType = SaveType.Hierarchy1;
 
     [ObservableProperty]
     private string _saveDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
@@ -92,6 +95,7 @@ public partial class MainViewModel : ObservableObject
                 {
                     SelectedLimit = config.SelectedLimit;
                     SelectedAudioQuality = config.SelectedAudioQuality;
+                    SelectedSaveType = config.SelectedSaveType;
                     SaveDirectoryPath = config.SaveDirectoryPath;
                 }
             }
@@ -113,6 +117,7 @@ public partial class MainViewModel : ObservableObject
             {
                 SelectedLimit = SelectedLimit,
                 SelectedAudioQuality = SelectedAudioQuality,
+                SelectedSaveType = SelectedSaveType,
                 SaveDirectoryPath = SaveDirectoryPath
             };
 
@@ -347,18 +352,30 @@ public partial class MainViewModel : ObservableObject
             // Get the file name from the URL and use the correct extension
             string fileName = $"{string.Join("_", music.Artist.Select(x => x.Name))}-{music.Name}{fileExtension}";
 
-            // 使用 SaveDirectoryPath/歌手/专辑/fileName，如果歌手名或者专辑名为空则使用默认目录
-            string artistName = string.Join("; ", music.Artist.Select(x => x.Name));
-            string albumName = music.Album?.Name ?? "";
             var filePath = Path.Combine(SaveDirectoryPath, fileName);
-            if (!string.IsNullOrWhiteSpace(artistName) && !string.IsNullOrWhiteSpace(albumName))
+            switch (SelectedSaveType)
             {
-                var newDir = Path.Combine(SaveDirectoryPath, artistName, albumName);
-                if (!Directory.Exists(newDir))
-                    Directory.CreateDirectory(newDir);
+                case SaveType.Direct:
+                    break;
+                case SaveType.Hierarchy1:
+                    {
+                        // 使用 SaveDirectoryPath/歌手/专辑/fileName，如果歌手名或者专辑名为空则使用默认目录
+                        string artistName = string.Join("; ", music.Artist.Select(x => x.Name));
+                        string albumName = music.Album?.Name ?? "";
+                        if (!string.IsNullOrWhiteSpace(artistName) && !string.IsNullOrWhiteSpace(albumName))
+                        {
+                            var newDir = Path.Combine(SaveDirectoryPath, artistName, albumName);
+                            if (!Directory.Exists(newDir))
+                                Directory.CreateDirectory(newDir);
 
-                filePath = Path.Combine(SaveDirectoryPath, artistName, albumName, fileName);
+                            filePath = Path.Combine(SaveDirectoryPath, artistName, albumName, fileName);
+                        }
+                        break;
+                    }
+                default:
+                    break;
             }
+            
             // 判断文件是否存在
             if (!File.Exists(filePath))
             {

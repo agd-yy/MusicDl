@@ -10,6 +10,9 @@ public class AppConfig
     [JsonProperty("selectedAudioQuality")]
     public AudioQuality SelectedAudioQuality { get; set; } = AudioQuality.Lossless;
 
+    [JsonProperty("selectedSaveType")]
+    public SaveType SelectedSaveType { get; set; } = SaveType.Hierarchy1;
+
     [JsonProperty("saveDirectoryPath")]
     public string SaveDirectoryPath { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
 }
