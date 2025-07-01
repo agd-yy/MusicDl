@@ -44,6 +44,7 @@
             <RowDefinition Height="38" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -82,7 +83,6 @@
         </Grid>
         <!--#endregion-->
 
-        <!--  其余的XAML内容保持不变  -->
         <!--#region Options-->
         <Grid
             Grid.Row="2"
@@ -90,44 +90,52 @@
             VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100" />
-                <ColumnDefinition Width="130" />
-                <ColumnDefinition Width="130" />
-                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <ComboBox ItemsSource="{Binding LimitOptions}" SelectedItem="{Binding SelectedLimit}" />
             <ComboBox
                 Grid.Column="1"
                 DisplayMemberPath="Description"
-                ItemsSource="{Binding Source={ext:Enumeration {x:Type model:AudioQuality}}}"
-                SelectedValue="{Binding SelectedAudioQuality}"
+                ItemsSource="{Binding Source={ext:EnumTupleDesc {x:Type model:ApiProvider}}}"
+                SelectedValue="{Binding SelectedApiProvider}"
                 SelectedValuePath="Value" />
             <ComboBox
                 Grid.Column="2"
                 DisplayMemberPath="Description"
-                ItemsSource="{Binding Source={ext:Enumeration {x:Type model:SaveType}}}"
+                ItemsSource="{Binding Source={ext:EnumDesc {x:Type model:AudioQuality}}}"
+                SelectedValue="{Binding SelectedAudioQuality}"
+                SelectedValuePath="Value" />
+            <ComboBox
+                Grid.Column="3"
+                DisplayMemberPath="Description"
+                ItemsSource="{Binding Source={ext:EnumDesc {x:Type model:SaveType}}}"
                 SelectedValue="{Binding SelectedSaveType}"
                 SelectedValuePath="Value" />
-
-            <ui:TextBox
-                Grid.Column="3"
-                Cursor="Hand"
-                IsReadOnly="True"
-                PlaceholderText="Save location"
-                Text="{Binding SaveDirectoryPath, UpdateSourceTrigger=PropertyChanged}"
-                ToolTip="{Binding SaveDirectoryPath}">
-                <ui:TextBox.Icon>
-                    <ui:SymbolIcon Symbol="FolderOpen24" />
-                </ui:TextBox.Icon>
-                <ui:TextBox.InputBindings>
-                    <MouseBinding Command="{Binding SelectSaveDirectoryCommand}" MouseAction="LeftClick" />
-                </ui:TextBox.InputBindings>
-            </ui:TextBox>
         </Grid>
+
+        <ui:TextBox
+            Grid.Row="3"
+            Margin="5,0"
+            HorizontalAlignment="Stretch"
+            Cursor="Hand"
+            IsReadOnly="True"
+            PlaceholderText="Save location"
+            Text="{Binding SaveDirectoryPath, UpdateSourceTrigger=PropertyChanged}"
+            ToolTip="{Binding SaveDirectoryPath}">
+            <ui:TextBox.Icon>
+                <ui:SymbolIcon Symbol="FolderOpen24" />
+            </ui:TextBox.Icon>
+            <ui:TextBox.InputBindings>
+                <MouseBinding Command="{Binding SelectSaveDirectoryCommand}" MouseAction="LeftClick" />
+            </ui:TextBox.InputBindings>
+        </ui:TextBox>
         <!--#endregion-->
 
         <!--#region List-->
         <ListBox
-            Grid.Row="3"
+            Grid.Row="4"
             Margin="8,0"
             HorizontalContentAlignment="Stretch"
             Background="Transparent"
@@ -339,7 +347,7 @@
 
         <!--#region Floating Playlist Button-->
         <ui:Button
-            Grid.Row="3"
+            Grid.Row="4"
             Width="60"
             Height="60"
             Margin="20"
@@ -364,8 +372,9 @@
         <!--  Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"  -->
         <Border
             Grid.Row="1"
-            Grid.RowSpan="3"
+            Grid.RowSpan="4"
             Margin="15"
+            d:Visibility="Collapsed"
             Background="White"
             BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
             BorderThickness="1"
@@ -644,8 +653,9 @@
         <!--  Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"  -->
         <Border
             Grid.Row="1"
-            Grid.RowSpan="3"
+            Grid.RowSpan="4"
             Margin="10"
+            d:Visibility="Collapsed"
             Background="White"
             BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
             BorderThickness="1"
@@ -811,16 +821,17 @@
         <!--#region ProcessBar-->
         <!--  Loading Indicator  -->
         <ui:ProgressRing
-            Grid.Row="1"
+            Grid.Row="2"
             Grid.RowSpan="3"
             Width="50"
             Height="50"
+            d:Visibility="Collapsed"
             IsIndeterminate="True"
             Visibility="{Binding IsSearching, Converter={cnvts:BooleanToVisibilityConverter}}" />
 
         <ui:SnackbarPresenter
             x:Name="MainSnackbar"
-            Grid.Row="1"
+            Grid.Row="2"
             Grid.RowSpan="3"
             VerticalAlignment="Bottom" />
         <!--#endregion-->

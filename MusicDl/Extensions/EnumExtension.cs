@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using MusicDl.Attributes;
+using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -23,6 +24,18 @@ public static class EnumExtension
             return enumName;
 
         var description = field.GetCustomAttribute<DescriptionAttribute>()?.Description;
+        return description ?? enumName;
+    }
+
+    public static string GetTupleDescription(this Enum enumValue)
+    {
+        ArgumentNullException.ThrowIfNull(enumValue);
+        var enumType = enumValue.GetType();
+        var enumName = enumValue.ToString();
+        var field = enumType.GetField(enumName);
+        if (field is null)
+            return enumName;
+        var description = field.GetCustomAttribute<TupleDescAttribute>()?.Value;
         return description ?? enumName;
     }
 

@@ -7,6 +7,9 @@ public class AppConfig
     [JsonProperty("selectedLimit")]
     public int SelectedLimit { get; set; } = 10;
 
+    [JsonProperty("selectedApiProvider")]
+    public ApiProvider SelectedApiProvider { get; set; } = ApiProvider.Kxz;
+
     [JsonProperty("selectedAudioQuality")]
     public AudioQuality SelectedAudioQuality { get; set; } = AudioQuality.Lossless;
 

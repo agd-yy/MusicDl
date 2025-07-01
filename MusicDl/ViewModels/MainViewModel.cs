@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
+using MusicDl.Extensions;
 using MusicDl.Models;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
@@ -51,6 +52,9 @@ public partial class MainViewModel : ObservableObject
     private List<int> _limitOptions = [1, 2, 5, 10, 15, 20, 30, 50, 100];
 
     [ObservableProperty]
+    private ApiProvider _selectedApiProvider = ApiProvider.Kxz;
+
+    [ObservableProperty]
     private AudioQuality _selectedAudioQuality = AudioQuality.Lossless;
 
     [ObservableProperty]
@@ -94,6 +98,7 @@ public partial class MainViewModel : ObservableObject
                 if (config != null)
                 {
                     SelectedLimit = config.SelectedLimit;
+                    SelectedApiProvider = config.SelectedApiProvider;
                     SelectedAudioQuality = config.SelectedAudioQuality;
                     SelectedSaveType = config.SelectedSaveType;
                     SaveDirectoryPath = config.SaveDirectoryPath;
@@ -116,6 +121,7 @@ public partial class MainViewModel : ObservableObject
             var config = new AppConfig
             {
                 SelectedLimit = SelectedLimit,
+                SelectedApiProvider = SelectedApiProvider,
                 SelectedAudioQuality = SelectedAudioQuality,
                 SelectedSaveType = SelectedSaveType,
                 SaveDirectoryPath = SaveDirectoryPath
@@ -233,7 +239,7 @@ public partial class MainViewModel : ObservableObject
             string qualityLevel = music.AudioQuality.ToString().ToLower();
 
             // Build the API URL with the music ID and quality level
-            string apiUrl = $"https://api.kxzjoker.cn/api/163_music?ids={music.Id}&level={qualityLevel}&type=json";
+            string apiUrl = $"https://{SelectedApiProvider.GetTupleDescription()}?ids={music.Id}&level={qualityLevel}&type=json";
 
             using var _httpClient = new HttpClient();
             // Make the API request

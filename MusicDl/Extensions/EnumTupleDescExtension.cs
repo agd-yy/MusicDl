@@ -1,14 +1,14 @@
-﻿using System.ComponentModel;
+﻿using MusicDl.Attributes;
 using System.Reflection;
 using System.Windows.Markup;
 
 namespace MusicDl.Extensions;
 
-public class EnumerationExtension : MarkupExtension
+public class EnumTupleDescExtension : MarkupExtension
 {
     private Type? _enumType;
 
-    public EnumerationExtension(Type enumType)
+    public EnumTupleDescExtension(Type enumType)
     {
         ArgumentNullException.ThrowIfNull(enumType);
         EnumType = enumType;
@@ -39,21 +39,21 @@ public class EnumerationExtension : MarkupExtension
             .Select(enumValue => new EnumerationMember
             {
                 Value = enumValue,
-                Description = GetDescription(enumValue)
+                Description = GetTupleDescription(enumValue)
             })
             .ToArray();
     }
 
-    private string GetDescription(object enumValue)
+    private string GetTupleDescription(object enumValue)
     {
         var fieldInfo = EnumType.GetField(enumValue.ToString()!);
         if (fieldInfo is null)
             return enumValue.ToString()!;
 
         var descriptionAttribute = fieldInfo
-            .GetCustomAttribute<DescriptionAttribute>();
+            .GetCustomAttribute<TupleDescAttribute>();
 
-        return descriptionAttribute?.Description ?? enumValue.ToString()!;
+        return descriptionAttribute?.Key ?? enumValue.ToString()!;
     }
 
     public class EnumerationMember
