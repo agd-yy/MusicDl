@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
+using MusicDl.Controls;
 using MusicDl.Extensions;
 using MusicDl.Models;
 using Newtonsoft.Json;
@@ -722,5 +723,33 @@ public partial class MainViewModel : ObservableObject
         }
 
         return musicDetail;
+    }
+
+    [RelayCommand]
+    private async Task ClearImageCacheAsync()
+    {
+        try
+        {
+            await OptimizedImage.ClearAllCacheAsync();
+            ShowMessage("图片缓存已清理", "成功", ControlAppearance.Success);
+        }
+        catch (Exception ex)
+        {
+            ShowMessage($"清理缓存失败: {ex.Message}", "错误", ControlAppearance.Danger);
+        }
+    }
+
+    [RelayCommand]
+    private async Task ShowCacheInfoAsync()
+    {
+        try
+        {
+            var (fileCount, sizeMB) = await OptimizedImage.GetCacheInfoAsync();
+            ShowMessage($"缓存文件: {fileCount} 个，大小: {sizeMB} MB", "缓存信息", ControlAppearance.Info);
+        }
+        catch (Exception ex)
+        {
+            ShowMessage($"获取缓存信息失败: {ex.Message}", "错误", ControlAppearance.Danger);
+        }
     }
 }

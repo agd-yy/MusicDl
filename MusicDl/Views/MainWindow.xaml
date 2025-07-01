@@ -54,6 +54,34 @@
             <ui:TitleBar.Icon>
                 <ui:ImageIcon Source="{DynamicResource DefaultCoverImage}" />
             </ui:TitleBar.Icon>
+            <!--#region Title Bar Menu-->
+            <ui:TitleBar.Header>
+                <StackPanel
+                    Margin="0,0,120,0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <ui:Button
+                        Width="32"
+                        Height="26"
+                        Padding="0"
+                        Appearance="Secondary"
+                        BorderThickness="0"
+                        Command="{Binding ShowCacheInfoCommand}"
+                        Icon="{ui:SymbolIcon Info24}"
+                        ToolTip="缓存信息" />
+                    <ui:Button
+                        Width="32"
+                        Height="26"
+                        Margin="4,0,0,0"
+                        Padding="0"
+                        Appearance="Secondary"
+                        BorderThickness="0"
+                        Command="{Binding ClearImageCacheCommand}"
+                        Icon="{ui:SymbolIcon TextClearFormatting24}"
+                        ToolTip="清理图片缓存" />
+                </StackPanel>
+            </ui:TitleBar.Header>
+            <!--#endregion-->
         </ui:TitleBar>
         <!--#endregion-->
 
@@ -177,7 +205,7 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <!--  Cover Image  -->
+                            <!--  Cover Image (使用 OptimizedImage)  -->
                             <Border
                                 Width="60"
                                 Height="60"
@@ -188,21 +216,6 @@
                                     DefaultImage="{StaticResource DefaultCoverImage}"
                                     ImageUrl="{Binding CoverUrl}"
                                     Stretch="UniformToFill" />
-                                <!--<Image Stretch="UniformToFill">
-                                    <Image.Style>
-                                        <Style TargetType="Image">
-                                            <Setter Property="Source" Value="{Binding CoverUrl}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding CoverUrl}" Value="{x:Null}">
-                                                    <Setter Property="Source" Value="{StaticResource DefaultCoverImage}" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding CoverUrl}" Value="">
-                                                    <Setter Property="Source" Value="{StaticResource DefaultCoverImage}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Image.Style>
-                                </Image>-->
                             </Border>
 
                             <!--  Music Details  -->
@@ -430,7 +443,7 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <!--  Cover Image  -->
+                            <!--  Cover Image (使用 OptimizedImage)  -->
                             <Border
                                 Width="130"
                                 Height="130"
@@ -717,6 +730,12 @@
                         Command="{Binding ClearPlaylistCommand}"
                         Content="清空列表"
                         Icon="{ui:SymbolIcon Delete24}" />
+                    <!--<ui:Button
+                        Margin="10,0,0,0"
+                        Appearance="Secondary"
+                        Command="{Binding ClearImageCacheCommand}"
+                        Content="清理缓存"
+                        Icon="{ui:SymbolIcon TextClearFormatting24}" />-->
                     <TextBlock
                         Margin="15,0,0,0"
                         VerticalAlignment="Center"
@@ -768,14 +787,18 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
-                                    <!--  Cover Image  -->
+                                    <!--  Cover Image (播放列表中也可以使用 OptimizedImage)  -->
                                     <Border
                                         Width="40"
                                         Height="40"
                                         Margin="0,0,8,0"
                                         ClipToBounds="True"
                                         CornerRadius="4">
-                                        <Image Stretch="UniformToFill">
+                                        <controls:OptimizedImage
+                                            DefaultImage="{StaticResource DefaultCoverImage}"
+                                            ImageUrl="{Binding CoverUrl}"
+                                            Stretch="UniformToFill" />
+                                        <!--<Image Stretch="UniformToFill">
                                             <Image.Style>
                                                 <Style TargetType="Image">
                                                     <Setter Property="Source" Value="{Binding CoverUrl}" />
@@ -789,7 +812,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Image.Style>
-                                        </Image>
+                                        </Image>-->
                                     </Border>
 
                                     <!--  Music Info  -->
