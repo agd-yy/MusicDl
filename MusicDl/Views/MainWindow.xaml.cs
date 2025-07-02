@@ -1,6 +1,7 @@
 ﻿using MusicDl.ViewModels;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Threading;
 using Wpf.Ui.Tray.Controls;
 
 namespace MusicDl.Views;
@@ -19,13 +20,10 @@ public partial class MainWindow
         _vm.SetSnackbarService(MainSnackbar);
     }
 
-    private void FluentWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    protected override void OnActivated(EventArgs e)
     {
-        _vm.SaveConfig();
-    }
+        base.OnActivated(e);
 
-    private void FluentWindow_Activated(object sender, System.EventArgs e)
-    {
         // 当窗口激活时，自动选中搜索框并全选文本
         FocusAndSelectSearchTextBox();
     }
@@ -38,7 +36,7 @@ public partial class MainWindow
         try
         {
             // 使用 Dispatcher.BeginInvoke 确保在UI完全加载后执行
-            Dispatcher.BeginInvoke(new System.Action(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (SearchTextBox != null)
                 {
@@ -48,9 +46,9 @@ public partial class MainWindow
                     // 全选文本内容
                     SearchTextBox.SelectAll();
                 }
-            }), System.Windows.Threading.DispatcherPriority.Input);
+            }), DispatcherPriority.Input);
         }
-        catch (System.Exception)
+        catch (Exception)
         {
             // 忽略任何可能的异常，避免影响程序运行
         }
@@ -77,6 +75,7 @@ public partial class MainWindow
 
     private void OnExit(object sender, RoutedEventArgs e)
     {
+        _vm.SaveConfig();
         Application.Current.Shutdown();
     }
 

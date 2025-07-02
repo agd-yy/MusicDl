@@ -17,8 +17,6 @@
     Width="600"
     Height="800"
     d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
-    Activated="FluentWindow_Activated"
-    Closing="FluentWindow_Closing"
     FontFamily="Microsoft Yahei"
     Icon="/Resources/CoverImage_x64.png"
     WindowStartupLocation="CenterScreen"
