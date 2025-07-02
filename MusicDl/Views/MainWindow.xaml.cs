@@ -1,4 +1,7 @@
 ﻿using MusicDl.ViewModels;
+using System.ComponentModel;
+using System.Windows;
+using Wpf.Ui.Tray.Controls;
 
 namespace MusicDl.Views;
 
@@ -59,5 +62,33 @@ public partial class MainWindow
     public void FocusSearchBox()
     {
         FocusAndSelectSearchTextBox();
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        e.Cancel = true; // 阻止窗口关闭
+        Hide(); // 隐藏窗口而不是关闭
+    }
+
+    private void ShowWindow(NotifyIcon sender, RoutedEventArgs e)
+    {
+        ShowAndActive();
+    }
+
+    private void OnExit(object sender, RoutedEventArgs e)
+    {
+        Application.Current.Shutdown();
+    }
+
+    private void OnShow(object sender, RoutedEventArgs e)
+    {
+        ShowAndActive();
+    }
+
+    private void ShowAndActive()
+    {
+        Show();
+        Activate();
+        FocusSearchBox(); // 确保在显示时聚焦搜索框
     }
 }

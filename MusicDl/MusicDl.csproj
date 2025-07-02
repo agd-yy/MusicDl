@@ -18,6 +18,7 @@
 
   <ItemGroup>
 	<None Remove="Resources\CoverImage.png" />
+	<None Remove="Resources\CoverImage_x64.png" />
 	<None Remove="Resources\favicon.ico" />
   </ItemGroup>
 
@@ -26,10 +27,12 @@
 	  <PackageReference Include="Newtonsoft.Json" />
 	  <PackageReference Include="TagLibSharp" />
 	  <PackageReference Include="WPF-UI" />
+	  <PackageReference Include="WPF-UI.Tray" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Resources\CoverImage.png" />
+    <Resource Include="Resources\CoverImage_x64.png" />
     <Resource Include="Resources\favicon.ico" />
   </ItemGroup>
 
