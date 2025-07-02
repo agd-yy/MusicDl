@@ -166,9 +166,10 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task SearchAsync()
     {
+        MusicDetails.Clear();
+
         if (string.IsNullOrWhiteSpace(SearchText))
         {
-            MusicDetails.Clear();
             ShowMessage("请输入搜索关键词", "提示", ControlAppearance.Info);
             return;
         }
