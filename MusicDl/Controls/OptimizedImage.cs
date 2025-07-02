@@ -41,7 +41,7 @@ public class OptimizedImage : Image
         set => SetValue(ImageUrlProperty, value);
     }
 
-    public BitmapImage DefaultImage { get; set; }
+    public required BitmapImage DefaultImage { get; set; }
 
     private static async void OnImageUrlChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {

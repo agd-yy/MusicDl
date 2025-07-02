@@ -31,12 +31,12 @@
             <Setter Property="Margin" Value="0,12,0,6" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="FontSize" Value="16" />
-            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="Foreground" Value="#FF1F1F1F" />
         </Style>
         <Style x:Key="InfoLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Margin" Value="0,2" />
-            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="Foreground" Value="#FF616161" />
         </Style>
     </ui:FluentWindow.Resources>
 
@@ -194,8 +194,8 @@
                     <Border
                         Margin="0,4"
                         Padding="12"
-                        Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                        Background="#FFFFFFFF"
+                        BorderBrush="#FFE5E5E5"
                         BorderThickness="1"
                         CornerRadius="8">
                         <Grid>
@@ -319,14 +319,14 @@
                                     <Border
                                         Margin="8,0,0,0"
                                         Padding="4,1"
-                                        BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                        BorderBrush="#FFC4C4C4"
                                         BorderThickness="1"
                                         CornerRadius="2"
                                         Visibility="{Binding IsMember, Converter={cnvts:BooleanToVisibilityConverter}}">
                                         <TextBlock
                                             FontSize="10"
                                             FontWeight="SemiBold"
-                                            Foreground="{DynamicResource SystemAccentColorDark1Brush}"
+                                            Foreground="#FF0078D4"
                                             Text="VIP" />
                                     </Border>
                                 </StackPanel>
@@ -394,7 +394,7 @@
             Margin="15"
             d:Visibility="Collapsed"
             Background="White"
-            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+            BorderBrush="#FFE5E5E5"
             BorderThickness="1"
             CornerRadius="12"
             DataContext="{Binding SelectedMusicDetail}"
@@ -489,7 +489,7 @@
                                 <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
                                     <ui:SymbolIcon
                                         VerticalAlignment="Center"
-                                        Foreground="{DynamicResource SystemAccentColorBrush}"
+                                        Foreground="#FF005FB8"
                                         Symbol="Clock24" />
                                     <TextBlock
                                         Margin="8,0,0,0"
@@ -502,7 +502,7 @@
                                 <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
                                     <Border
                                         Padding="8,4"
-                                        Background="{DynamicResource SystemAccentColorBrush}"
+                                        Background="#FF005FB8"
                                         CornerRadius="6">
                                         <TextBlock
                                             FontSize="12"
@@ -520,7 +520,7 @@
                                     <Border
                                         Margin="12,0,0,0"
                                         Padding="6,2"
-                                        Background="{DynamicResource SystemAccentColorDark1Brush}"
+                                        Background="#FF0078D4"
                                         CornerRadius="4"
                                         Visibility="{Binding IsMember, Converter={cnvts:BooleanToVisibilityConverter}}">
                                         <TextBlock
@@ -542,7 +542,7 @@
                                         <Border
                                             Margin="0,4"
                                             Padding="12,8"
-                                            Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                            Background="#FFF6F6F6"
                                             CornerRadius="6">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
@@ -551,7 +551,7 @@
                                                 </Grid.ColumnDefinitions>
                                                 <ui:SymbolIcon
                                                     VerticalAlignment="Center"
-                                                    Foreground="{DynamicResource SystemAccentColorBrush}"
+                                                    Foreground="#FF005FB8"
                                                     Symbol="Person24" />
                                                 <TextBlock
                                                     Grid.Column="1"
@@ -571,7 +571,7 @@
                             <TextBlock Style="{StaticResource SectionTitle}" Text="专辑信息" />
                             <Border
                                 Padding="12,10"
-                                Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                Background="#FFF6F6F6"
                                 CornerRadius="6">
                                 <StackPanel>
                                     <Grid Margin="0,0,0,8">
@@ -581,7 +581,7 @@
                                         </Grid.ColumnDefinitions>
                                         <ui:SymbolIcon
                                             VerticalAlignment="Center"
-                                            Foreground="{DynamicResource SystemAccentColorBrush}"
+                                            Foreground="#FF005FB8"
                                             Symbol="Album24" />
                                         <TextBlock
                                             Grid.Column="1"
@@ -598,7 +598,7 @@
                                         </Grid.ColumnDefinitions>
                                         <ui:SymbolIcon
                                             VerticalAlignment="Center"
-                                            Foreground="{DynamicResource SystemAccentColorBrush}"
+                                            Foreground="#FF005FB8"
                                             Symbol="CalendarLtr24" />
                                         <TextBlock
                                             Grid.Column="1"
@@ -624,7 +624,7 @@
                         <StackPanel Visibility="{Binding Lyric, Converter={cnvts:StringToVisibilityConverter}}">
                             <TextBlock Style="{StaticResource SectionTitle}" Text="歌词" />
                             <Border
-                                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                BorderBrush="#FFC4C4C4"
                                 BorderThickness="1"
                                 CornerRadius="8">
                                 <ScrollViewer MaxHeight="250" VerticalScrollBarVisibility="Auto">
@@ -679,7 +679,7 @@
             Margin="10"
             d:Visibility="Collapsed"
             Background="White"
-            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+            BorderBrush="#FFE5E5E5"
             BorderThickness="1"
             CornerRadius="8"
             Visibility="{Binding IsPlaylistVisible, Converter={cnvts:BooleanToVisibilityConverter}}">
@@ -776,8 +776,8 @@
                             <Border
                                 Margin="0,2"
                                 Padding="10"
-                                Background="{DynamicResource SubtleFillColorSecondaryBrush}"
-                                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                Background="#FFF6F6F6"
+                                BorderBrush="#FFC4C4C4"
                                 BorderThickness="1"
                                 CornerRadius="6">
                                 <Grid>
